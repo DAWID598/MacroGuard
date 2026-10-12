@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: macroguard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: macroguard
+      POSTGRES_PASSWORD: macroguard_dev_password
+      POSTGRES_DB: macroguard_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - macroguard_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U macroguard -d macroguard_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  macroguard_pgdata:
+

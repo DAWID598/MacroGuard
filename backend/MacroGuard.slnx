@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MacroGuard.Api/MacroGuard.Api.csproj" />
+    <Project Path="src/MacroGuard.Application/MacroGuard.Application.csproj" />
+    <Project Path="src/MacroGuard.Domain/MacroGuard.Domain.csproj" />
+    <Project Path="src/MacroGuard.Infrastructure/MacroGuard.Infrastructure.csproj" />
+  </Folder>
+</Solution>

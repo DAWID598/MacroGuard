@@ -1,0 +1,47 @@
+@use '@angular/material' as mat;
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background-color: #f4f6f9;
+  color: #1e293b;
+}
+
+.page-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.macro-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 6px;
+
+  &.kcal {
+    background: #eef2ff;
+    color: #3730a3;
+  }
+  &.protein {
+    background: #dcfce7;
+    color: #166534;
+  }
+  &.carbs {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  &.fat {
+    background: #fce7f3;
+    color: #9d174d;
+  }
+}

@@ -1,0 +1,29 @@
+using MacroGuard.Application.DTOs;
+
+namespace MacroGuard.Application.Interfaces;
+
+public interface IAuthService
+{
+    Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default);
+    Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default);
+}
+
+public interface IProfileService
+{
+    Task<UserProfileDto> GetProfileAsync(Guid userId, CancellationToken ct = default);
+    Task<UserProfileDto> CalculateAndSaveProfileAsync(Guid userId, CalculateProfileRequest request, CancellationToken ct = default);
+}
+
+public interface IFoodService
+{
+    Task<List<FoodItemDto>> SearchFoodsAsync(Guid userId, string? query, string? category, CancellationToken ct = default);
+    Task<FoodItemDto> CreateFoodAsync(Guid userId, CreateFoodItemRequest request, CancellationToken ct = default);
+}
+
+public interface IDiaryService
+{
+    Task<DailyDiaryDto> GetDailyDiaryAsync(Guid userId, DateOnly date, CancellationToken ct = default);
+    Task<MealEntryDto> AddMealEntryAsync(Guid userId, AddMealEntryRequest request, CancellationToken ct = default);
+    Task<bool> DeleteMealEntryAsync(Guid userId, Guid entryId, CancellationToken ct = default);
+}
+
