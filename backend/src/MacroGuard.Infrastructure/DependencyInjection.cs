@@ -32,7 +32,8 @@ public static class DependencyInjection
                 options.User.RequireUniqueEmail = true;
             })
             .AddRoles<IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<MacroGuardDbContext>();
+            .AddEntityFrameworkStores<MacroGuardDbContext>()
+            .AddDefaultTokenProviders();
 
         var jwtKey = configuration["Jwt:Key"] ?? "MacroGuard_SuperSecretDevelopmentKey_2026_AtLeast32Bytes!";
         var jwtIssuer = configuration["Jwt:Issuer"] ?? "MacroGuard.Api";
@@ -59,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IFoodService, FoodService>();
         services.AddScoped<IDiaryService, DiaryService>();
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
 
         return services;
     }

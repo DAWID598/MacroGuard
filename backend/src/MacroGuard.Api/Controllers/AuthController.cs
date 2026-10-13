@@ -35,5 +35,30 @@ public class AuthController(IAuthService authService) : ControllerBase
             return Unauthorized(new { message = ex.Message });
         }
     }
+
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<ForgotPasswordResponse>> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken ct)
+    {
+        var response = await authService.ForgotPasswordAsync(request, ct);
+        return Ok(response);
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await authService.ResetPasswordAsync(request, ct);
+            return Ok(new { message = "Hasło zostało pomyślnie zmienione. Możesz się teraz zalogować." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
 

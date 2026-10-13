@@ -6,6 +6,8 @@ public interface IAuthService
 {
     Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default);
     Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default);
+    Task<ForgotPasswordResponse> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default);
+    Task<bool> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default);
 }
 
 public interface IProfileService

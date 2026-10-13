@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { AuthResponse } from '../models/api.models';
+import { AuthResponse, ForgotPasswordResponse } from '../models/api.models';
 
 const STORAGE_KEY = 'macroguard_auth';
 
@@ -25,6 +25,18 @@ export class AuthService {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/register`, { email, password, displayName })
       .pipe(tap((res) => this.setSession(res)));
+  }
+
+  forgotPassword(email: string): Observable<ForgotPasswordResponse> {
+    return this.http.post<ForgotPasswordResponse>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(email: string, token: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, {
+      email,
+      token,
+      newPassword
+    });
   }
 
   logout(): void {

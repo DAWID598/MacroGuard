@@ -12,11 +12,13 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
 
 ## Szybki Start
 
-### 1. Uruchom bazę danych PostgreSQL (Docker)
+### 1. Uruchom usługi Docker (PostgreSQL 17 + serwer pocztowy Mailpit)
 Upewnij się, że aplikacja **Docker Desktop** jest włączona, a następnie w głównym katalogu uruchom:
 ```powershell
 docker compose up -d
 ```
+> [!TIP]
+> Lokalna skrzynka pocztowa **Mailpit** jest dostępna w przeglądarce pod adresem: `http://localhost:8025`. Trafiają tam wszystkie e-maile z resetem hasła wysyłane przez aplikację — **działa od strzała dla każdego bez konfiguracji**!
 
 ### 2. Uruchom Backend (.NET 10 API)
 Przy pierwszym uruchomieniu API automatycznie utworzy tabele w bazie PostgreSQL i wypełni bazę ~24 popularnymi produktami spożywczymi:

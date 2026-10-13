@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -38,7 +38,12 @@ import { AuthService } from '../../core/services/auth.service';
           <p>Twój inteligentny dziennik kalorii, makroskładników i kalkulator BMR/TDEE</p>
         </div>
 
-        <mat-tab-group animationDuration="200ms" dynamicHeight>
+        <mat-tab-group
+          [selectedIndex]="selectedTabIndex()"
+          (selectedIndexChange)="selectedTabIndex.set($event)"
+          animationDuration="200ms"
+          dynamicHeight
+        >
           <!-- LOGOWANIE -->
           <mat-tab label="Logowanie">
             <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
@@ -60,6 +65,18 @@ import { AuthService } from '../../core/services/auth.service';
                   <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
               </mat-form-field>
+
+              <div class="forgot-link-wrapper">
+                <button
+                  type="button"
+                  mat-button
+                  color="primary"
+                  class="forgot-link-btn"
+                  (click)="openForgotPasswordTab()"
+                >
+                  Nie pamiętasz hasła?
+                </button>
+              </div>
 
               <button
                 mat-flat-button
@@ -119,6 +136,102 @@ import { AuthService } from '../../core/services/auth.service';
                 }
               </button>
             </form>
+          </mat-tab>
+
+          <!-- RESET HASŁA -->
+          <mat-tab label="Reset hasła">
+            <div class="auth-form">
+              @if (resetStep() === 1) {
+                <p class="reset-desc">
+                  Podaj adres e-mail przypisany do Twojego konta. Wyślemy na niego bezpieczną wiadomość z linkiem do zresetowania hasła.
+                </p>
+
+                <form [formGroup]="forgotForm" (ngSubmit)="onSendResetToken()">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Adres e-mail</mat-label>
+                    <input matInput type="email" formControlName="email" placeholder="jan@example.com" />
+                    <mat-icon matSuffix>mail_outline</mat-icon>
+                  </mat-form-field>
+
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="submit"
+                    class="submit-btn"
+                    [disabled]="forgotForm.invalid || isLoading()"
+                  >
+                    @if (isLoading()) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      Wyślij link resetujący na e-mail
+                    }
+                  </button>
+                </form>
+              } @else {
+                <div class="email-notice-card">
+                  <mat-icon color="primary">mark_email_read</mat-icon>
+                  <div>
+                    <strong>Wiadomość została wysłana!</strong>
+                    <p>Sprawdź swoją skrzynkę pocztową i kliknij w otrzymany link lub wklej poniżej token z wiadomości.</p>
+                  </div>
+                </div>
+
+                <form [formGroup]="resetForm" (ngSubmit)="onResetPassword()">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Adres e-mail</mat-label>
+                    <input matInput type="email" formControlName="email" />
+                    <mat-icon matSuffix>mail_outline</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Token resetujący (z wiadomości e-mail)</mat-label>
+                    <input matInput formControlName="token" placeholder="Wklej token resetujący" />
+                    <mat-icon matSuffix>vpn_key</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Nowe hasło (min. 6 znaków)</mat-label>
+                    <input
+                      matInput
+                      [type]="hidePassword() ? 'password' : 'text'"
+                      formControlName="newPassword"
+                    />
+                    <button
+                      type="button"
+                      mat-icon-button
+                      matSuffix
+                      (click)="hidePassword.set(!hidePassword())"
+                    >
+                      <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                  </mat-form-field>
+
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="submit"
+                    class="submit-btn"
+                    [disabled]="resetForm.invalid || isLoading()"
+                  >
+                    @if (isLoading()) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      Ustaw nowe hasło
+                    }
+                  </button>
+
+                  <button
+                    type="button"
+                    mat-button
+                    (click)="resetStep.set(1)"
+                    class="back-btn"
+                  >
+                    <mat-icon>arrow_back</mat-icon>
+                    Wróć do wpisywania e-maila
+                  </button>
+                </form>
+              }
+            </div>
           </mat-tab>
         </mat-tab-group>
       </mat-card>
@@ -185,21 +298,79 @@ import { AuthService } from '../../core/services/auth.service';
       padding-top: 20px;
     }
 
+    .w-100 {
+      width: 100%;
+    }
+
+    .forgot-link-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -6px;
+      margin-bottom: 4px;
+    }
+
+    .forgot-link-btn {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 0 6px;
+    }
+
+    .reset-desc {
+      font-size: 13.5px;
+      color: #64748b;
+      line-height: 1.45;
+      margin: 0 0 14px;
+    }
+
+    .email-notice-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+
+      strong {
+        display: block;
+        font-size: 13.5px;
+        color: #312e81;
+        margin-bottom: 2px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 12.5px;
+        color: #4338ca;
+        line-height: 1.4;
+      }
+    }
+
     .submit-btn {
+      width: 100%;
       height: 46px;
       font-size: 15px;
       font-weight: 600;
       margin-top: 8px;
       border-radius: 10px;
     }
+
+    .back-btn {
+      width: 100%;
+      margin-top: 8px;
+    }
   `]
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
 
+  readonly selectedTabIndex = signal(0);
+  readonly resetStep = signal(1);
   readonly hidePassword = signal(true);
   readonly isLoading = signal(false);
 
@@ -214,6 +385,45 @@ export class AuthComponent {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
+  readonly forgotForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]]
+  });
+
+  readonly resetForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    token: ['', [Validators.required]],
+    newPassword: ['', [Validators.required, Validators.minLength(6)]]
+  });
+
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      const email = params.get('email');
+      const token = params.get('token');
+
+      if (email && token) {
+        this.resetForm.patchValue({ email, token });
+        this.resetStep.set(2);
+        this.selectedTabIndex.set(2);
+        this.snackBar.open('Token zweryfikowany z linku! Wprowadź nowe hasło.', 'OK', { duration: 4000 });
+      } else if (tab === 'reset') {
+        if (email) {
+          this.forgotForm.patchValue({ email });
+        }
+        this.selectedTabIndex.set(2);
+      }
+    });
+  }
+
+  openForgotPasswordTab(): void {
+    const currentEmail = this.loginForm.controls.email.value;
+    if (currentEmail) {
+      this.forgotForm.patchValue({ email: currentEmail });
+    }
+    this.resetStep.set(1);
+    this.selectedTabIndex.set(2);
+  }
+
   onLogin(): void {
     if (this.loginForm.invalid) return;
     this.isLoading.set(true);
@@ -227,7 +437,7 @@ export class AuthComponent {
       },
       error: (err) => {
         this.isLoading.set(false);
-        const msg = err?.error?.message ?? 'Nie udało się zalogować. Sprawdź dane lub połączenie z API.';
+        const msg = err?.error?.message ?? 'Nieprawidłowy adres e-mail lub hasło.';
         this.snackBar.open(msg, 'Zamknij', { duration: 4000 });
       }
     });
@@ -253,5 +463,51 @@ export class AuthComponent {
       }
     });
   }
-}
 
+  onSendResetToken(): void {
+    if (this.forgotForm.invalid) return;
+    this.isLoading.set(true);
+    const email = this.forgotForm.controls.email.value;
+
+    this.authService.forgotPassword(email).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        this.resetForm.patchValue({ email });
+        this.resetStep.set(2);
+        this.snackBar.open(
+          res.message ?? 'Wysłaliśmy wiadomość e-mail z linkiem do zresetowania hasła!',
+          'OK',
+          { duration: 6000 }
+        );
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        const msg = err?.error?.message ?? 'Błąd podczas wysyłania wiadomości z resetem hasła.';
+        this.snackBar.open(msg, 'Zamknij', { duration: 5000 });
+      }
+    });
+  }
+
+  onResetPassword(): void {
+    if (this.resetForm.invalid) return;
+    this.isLoading.set(true);
+    const { email, token, newPassword } = this.resetForm.getRawValue();
+
+    this.authService.resetPassword(email, token, newPassword).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        this.snackBar.open(res.message ?? 'Hasło zostało pomyślnie zmienione! Możesz się zalogować.', 'Super', {
+          duration: 4000
+        });
+        this.loginForm.patchValue({ email, password: newPassword });
+        this.resetStep.set(1);
+        this.selectedTabIndex.set(0);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        const msg = err?.error?.message ?? 'Nie udało się zresetować hasła. Upewnij się, że token jest poprawny.';
+        this.snackBar.open(msg, 'Zamknij', { duration: 5000 });
+      }
+    });
+  }
+}

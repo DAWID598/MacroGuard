@@ -31,6 +31,20 @@ export interface AuthResponse {
   displayName: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+}
+
 export interface UserProfileDto {
   id: string;
   age: number;
