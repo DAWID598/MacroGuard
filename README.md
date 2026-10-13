@@ -26,8 +26,18 @@ dotnet run --project backend/src/MacroGuard.Api
 Backend nasłuchuje pod adresem: `http://localhost:5000`
 
 ### 3. Uruchom Frontend (Angular + Angular Material)
-```powershell
-npm.cmd --prefix frontend start
+Przejdź do folderu `frontend`, zainstaluj zależności (przy pierwszym uruchomieniu po sklonowaniu repozytorium) i wystartuj serwer deweloperski:
+
+```bash
+cd frontend
+npm install    # tylko przy pierwszym pobraniu projektu
+npm start      # lub: ng serve
 ```
+
+Alternatywnie z poziomu głównego katalogu (działa identycznie na Windows, Linux i macOS):
+```bash
+npm --prefix frontend start
+```
+
 Aplikacja będzie dostępna w przeglądarce pod adresem: `http://localhost:4200`
 
