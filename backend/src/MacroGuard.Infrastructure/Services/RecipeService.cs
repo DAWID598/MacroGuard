@@ -90,7 +90,7 @@ public class RecipeService(
         // Dopasowanie modelu i formatu
         if (string.Equals(provider, "Gemini", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(apiKey))
         {
-            var m = string.IsNullOrWhiteSpace(model) ? "gemini-1.5-flash" : model;
+            var m = string.IsNullOrWhiteSpace(model) || model == "gemini-1.5-flash" || model == "gemini-2.5-flash" ? "gemini-3.5-flash-lite" : model;
             return new ResolvedAiConfig("Gemini", m, apiKey, baseUrl, true, $"Google Gemini ({m})");
         }
 
@@ -151,7 +151,7 @@ public class RecipeService(
                 if (recipe is not null)
                 {
                     logger.LogInformation("Pomyślnie wygenerowano przepis z użyciem {DisplayName}.", config.DisplayName);
-                    return recipe;
+                    return await SynchronizeRecipeWithDatabaseAndScaleAsync(recipe, request.TargetCalories, ct);
                 }
             }
             catch (Exception ex)
@@ -161,7 +161,8 @@ public class RecipeService(
         }
 
         // Wbudowany inteligentny generator kulinarny
-        return GenerateBuiltInRecipe(request);
+        var builtIn = GenerateBuiltInRecipe(request);
+        return await SynchronizeRecipeWithDatabaseAndScaleAsync(builtIn, request.TargetCalories, ct);
     }
 
     public async Task<List<MealEntryDto>> ApplyRecipeToDiaryAsync(Guid userId, ApplyRecipeRequest request, CancellationToken ct = default)
@@ -223,6 +224,92 @@ public class RecipeService(
         }
 
         return createdDtos;
+    }
+
+    private async Task<GeneratedRecipeDto> SynchronizeRecipeWithDatabaseAndScaleAsync(
+        GeneratedRecipeDto recipe,
+        int targetCalories,
+        CancellationToken ct)
+    {
+        if (recipe.Ingredients.Count == 0) return recipe;
+
+        // 1. Dopasuj do bazy danych - jeśli produkt już istnieje, bierzemy jego oficjalne makro na 100g
+        var normalizedList = new List<(RecipeIngredientDto Original, decimal Kcal100, decimal Prot100, decimal Carb100, decimal Fat100, string Cat)>();
+
+        foreach (var ing in recipe.Ingredients)
+        {
+            var normName = ing.Name.Trim().ToLower();
+            var existing = await dbContext.FoodItems
+                .AsNoTracking()
+                .FirstOrDefaultAsync(f => f.Name.ToLower() == normName, ct);
+
+            if (existing is not null)
+            {
+                normalizedList.Add((ing, existing.CaloriesPer100g, existing.ProteinPer100g, existing.CarbsPer100g, existing.FatPer100g, existing.Category));
+            }
+            else
+            {
+                normalizedList.Add((ing, ing.CaloriesPer100g, ing.ProteinPer100g, ing.CarbsPer100g, ing.FatPer100g, ing.Category));
+            }
+        }
+
+        // 2. Oblicz sumę kalorii ze składników w oparciu o ich rzeczywiste parametry
+        decimal currentSumKcal = 0;
+        foreach (var item in normalizedList)
+        {
+            currentSumKcal += item.Kcal100 * item.Original.WeightGrams / 100m;
+        }
+
+        // 3. Oblicz współczynnik skalowania, aby trafić w żądany cel użytkownika
+        decimal scale = 1.0m;
+        if (currentSumKcal > 50 && targetCalories > 50)
+        {
+            scale = (decimal)targetCalories / currentSumKcal;
+            if (scale < 0.65m) scale = 0.65m;
+            if (scale > 1.45m) scale = 1.45m;
+        }
+
+        var updatedIngredients = new List<RecipeIngredientDto>();
+        decimal finalKcal = 0, finalProt = 0, finalCarbs = 0, finalFat = 0;
+
+        foreach (var item in normalizedList)
+        {
+            decimal scaledWeight = Math.Max(5, Math.Round(item.Original.WeightGrams * scale, 0));
+
+            // Dokładnie taka sama formuła jak w encji MealEntry (zaokrąglenie do 1 miejsca)
+            decimal pKcal = Math.Round(item.Kcal100 * scaledWeight / 100m, 1);
+            decimal pProt = Math.Round(item.Prot100 * scaledWeight / 100m, 1);
+            decimal pCarb = Math.Round(item.Carb100 * scaledWeight / 100m, 1);
+            decimal pFat = Math.Round(item.Fat100 * scaledWeight / 100m, 1);
+
+            finalKcal += pKcal;
+            finalProt += pProt;
+            finalCarbs += pCarb;
+            finalFat += pFat;
+
+            updatedIngredients.Add(new RecipeIngredientDto(
+                Name: item.Original.Name,
+                WeightGrams: scaledWeight,
+                CaloriesPer100g: item.Kcal100,
+                ProteinPer100g: item.Prot100,
+                CarbsPer100g: item.Carb100,
+                FatPer100g: item.Fat100,
+                PortionCalories: pKcal,
+                PortionProtein: pProt,
+                PortionCarbs: pCarb,
+                PortionFat: pFat,
+                Category: item.Cat
+            ));
+        }
+
+        return recipe with
+        {
+            TotalCalories = (int)Math.Round(finalKcal),
+            TotalProtein = Math.Round(finalProt, 1),
+            TotalCarbs = Math.Round(finalCarbs, 1),
+            TotalFat = Math.Round(finalFat, 1),
+            Ingredients = updatedIngredients
+        };
     }
 
     private static string BuildPrompt(GenerateRecipeRequest req)
@@ -315,25 +402,48 @@ Odpowiedz WYŁĄCZNIE poprawnym obiektem JSON w poniższym formacie, bez żadneg
             }
         };
 
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{cfg.Model}:generateContent?key={cfg.ApiKey}";
-        var response = await client.PostAsJsonAsync(url, body, ct);
-        if (!response.IsSuccessStatusCode)
+        var candidateModels = new List<string> { cfg.Model };
+        if (!candidateModels.Contains("gemini-3.5-flash-lite")) candidateModels.Add("gemini-3.5-flash-lite");
+        if (!candidateModels.Contains("gemini-flash-latest")) candidateModels.Add("gemini-flash-latest");
+        if (!candidateModels.Contains("gemini-3.7-flash")) candidateModels.Add("gemini-3.7-flash");
+
+        foreach (var modelName in candidateModels)
         {
-            var err = await response.Content.ReadAsStringAsync(ct);
-            logger.LogWarning("Gemini API error ({StatusCode}): {Error}", response.StatusCode, err);
-            return null;
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent?key={cfg.ApiKey}";
+            var response = await client.PostAsJsonAsync(url, body, ct);
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync(ct);
+                logger.LogWarning("Gemini API ({Model}) zwróciło błąd {StatusCode}: {Error}. Próba z kolejnym modelem...", modelName, response.StatusCode, err);
+                continue;
+            }
+
+            var json = await response.Content.ReadAsStringAsync(ct);
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("candidates", out var candidates) || candidates.GetArrayLength() == 0)
+            {
+                continue;
+            }
+
+            var parts = candidates[0].GetProperty("content").GetProperty("parts");
+            string? text = null;
+            foreach (var part in parts.EnumerateArray())
+            {
+                if (part.TryGetProperty("text", out var tProp))
+                {
+                    text = tProp.GetString();
+                    if (!string.IsNullOrWhiteSpace(text)) break;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                var recipe = ParseRecipeJson(text, $"Google Gemini ({modelName})");
+                if (recipe is not null) return recipe;
+            }
         }
 
-        var json = await response.Content.ReadAsStringAsync(ct);
-        using var doc = JsonDocument.Parse(json);
-        var text = doc.RootElement
-            .GetProperty("candidates")[0]
-            .GetProperty("content")
-            .GetProperty("parts")[0]
-            .GetProperty("text")
-            .GetString();
-
-        return ParseRecipeJson(text ?? "", cfg.DisplayName);
+        return null;
     }
 
     private async Task<GeneratedRecipeDto?> TryGenerateWithOpenAiCompatibleAsync(ResolvedAiConfig cfg, GenerateRecipeRequest req, CancellationToken ct)
