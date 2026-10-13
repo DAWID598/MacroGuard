@@ -56,11 +56,13 @@ public static class DependencyInjection
 
         services.AddAuthorization();
 
+        services.AddHttpClient();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IProfileService, ProfileService>();
         services.AddScoped<IFoodService, FoodService>();
         services.AddScoped<IDiaryService, DiaryService>();
         services.AddScoped<IEmailSender, SmtpEmailSender>();
+        services.AddScoped<IRecipeService, RecipeService>();
 
         return services;
     }

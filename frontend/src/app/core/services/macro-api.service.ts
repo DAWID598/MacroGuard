@@ -3,10 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AddMealEntryRequest,
+  AiInfoDto,
+  ApplyRecipeRequest,
   CalculateProfileRequest,
   CreateFoodItemRequest,
   DailyDiaryDto,
   FoodItemDto,
+  GenerateRecipeRequest,
+  GeneratedRecipeDto,
   MacroCalculationResult,
   MealEntryDto,
   UserProfileDto
@@ -58,6 +62,19 @@ export class MacroApiService {
 
   deleteMealEntry(entryId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/diary/${entryId}`);
+  }
+
+  // Generator przepisów AI
+  generateRecipe(request: GenerateRecipeRequest): Observable<GeneratedRecipeDto> {
+    return this.http.post<GeneratedRecipeDto>(`${this.baseUrl}/recipes/generate`, request);
+  }
+
+  applyRecipe(request: ApplyRecipeRequest): Observable<MealEntryDto[]> {
+    return this.http.post<MealEntryDto[]>(`${this.baseUrl}/recipes/apply`, request);
+  }
+
+  getAiInfo(): Observable<AiInfoDto> {
+    return this.http.get<AiInfoDto>(`${this.baseUrl}/recipes/ai-info`);
   }
 }
 

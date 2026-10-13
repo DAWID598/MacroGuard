@@ -148,3 +148,50 @@ export interface AddMealEntryRequest {
   weightGrams: number;
 }
 
+export interface GenerateRecipeRequest {
+  mealType: MealType;
+  targetCalories: number;
+  preference?: string | null;
+}
+
+export interface RecipeIngredientDto {
+  name: string;
+  weightGrams: number;
+  caloriesPer100g: number;
+  proteinPer100g: number;
+  carbsPer100g: number;
+  fatPer100g: number;
+  portionCalories: number;
+  portionProtein: number;
+  portionCarbs: number;
+  portionFat: number;
+  category: string;
+}
+
+export interface GeneratedRecipeDto {
+  title: string;
+  description: string;
+  prepTimeMinutes: number;
+  totalCalories: number;
+  totalProtein: number;
+  totalCarbs: number;
+  totalFat: number;
+  ingredients: RecipeIngredientDto[];
+  steps: string[];
+  aiModelUsed?: string;
+}
+
+export interface AiInfoDto {
+  provider: string;
+  modelName: string;
+  isLiveAi: boolean;
+  displayName: string;
+}
+
+export interface ApplyRecipeRequest {
+  consumedDate: string;
+  mealType: MealType;
+  recipeTitle: string;
+  ingredients: RecipeIngredientDto[];
+}
+

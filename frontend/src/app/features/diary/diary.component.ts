@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DailyDiaryDto, MealGroupDto, MealType } from '../../core/models/api.models';
 import { MacroApiService } from '../../core/services/macro-api.service';
 import { AddFoodDialogComponent } from './add-food-dialog.component';
+import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
 
 @Component({
   selector: 'app-diary',
@@ -39,23 +40,30 @@ import { AddFoodDialogComponent } from './add-food-dialog.component';
           <p class="subtitle">Monitoruj dzienne spożycie kalorii i makroskładników w 4 posiłkach</p>
         </div>
 
-        <div class="date-navigator">
-          <button mat-icon-button (click)="shiftDate(-1)" matTooltip="Poprzedni dzień">
-            <mat-icon>chevron_left</mat-icon>
+        <div class="header-actions">
+          <button mat-flat-button class="ai-generator-btn" (click)="openAiGenerator()">
+            <mat-icon>auto_awesome</mat-icon>
+            Nie masz pomysłu? Wygeneruj posiłek
           </button>
 
-          <input
-            type="date"
-            class="date-input"
-            [ngModel]="selectedDate()"
-            (ngModelChange)="onDateChange($event)"
-          />
+          <div class="date-navigator">
+            <button mat-icon-button (click)="shiftDate(-1)" matTooltip="Poprzedni dzień">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
 
-          <button mat-icon-button (click)="shiftDate(1)" matTooltip="Następny dzień">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
+            <input
+              type="date"
+              class="date-input"
+              [ngModel]="selectedDate()"
+              (ngModelChange)="onDateChange($event)"
+            />
 
-          <button mat-stroked-button (click)="goToToday()">Dzisiaj</button>
+            <button mat-icon-button (click)="shiftDate(1)" matTooltip="Następny dzień">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+
+            <button mat-stroked-button (click)="goToToday()">Dzisiaj</button>
+          </div>
         </div>
       </div>
 
@@ -159,15 +167,27 @@ import { AddFoodDialogComponent } from './add-food-dialog.component';
                   </div>
                 </div>
 
-                <button
-                  mat-flat-button
-                  color="primary"
-                  class="add-btn"
-                  (click)="openAddFoodDialog(meal)"
-                >
-                  <mat-icon>add</mat-icon>
-                  Dodaj
-                </button>
+                <div class="meal-actions">
+                  <button
+                    mat-stroked-button
+                    class="ai-meal-btn"
+                    matTooltip="Wygeneruj pomysł na ten posiłek z AI"
+                    (click)="openAiGenerator(meal.mealType)"
+                  >
+                    <mat-icon>auto_awesome</mat-icon>
+                    AI Pomysł
+                  </button>
+
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    class="add-btn"
+                    (click)="openAddFoodDialog(meal)"
+                  >
+                    <mat-icon>add</mat-icon>
+                    Dodaj
+                  </button>
+                </div>
               </div>
 
               <mat-divider></mat-divider>
@@ -232,6 +252,33 @@ import { AddFoodDialogComponent } from './add-food-dialog.component';
         margin: 0;
         color: #64748b;
         font-size: 14px;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .ai-generator-btn {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 0 16px;
+      height: 42px;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+      }
+
+      mat-icon {
+        margin-right: 6px;
       }
     }
 
@@ -395,6 +442,30 @@ import { AddFoodDialogComponent } from './add-food-dialog.component';
           color: #0f172a;
         }
       }
+
+      .meal-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .ai-meal-btn {
+        border-color: #c7d2fe !important;
+        color: #4f46e5 !important;
+        font-weight: 600;
+        border-radius: 10px;
+
+        &:hover {
+          background: #eef2ff !important;
+        }
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          margin-right: 4px;
+        }
+      }
     }
 
     .meal-entries {
@@ -512,6 +583,32 @@ export class DiaryComponent implements OnInit {
       default:
         return 'fastfood';
     }
+  }
+
+  openAiGenerator(mealType?: MealType): void {
+    const rem = this.remainingKcal();
+    const suggested = rem > 150 ? Math.min(rem, 900) : 500;
+
+    const ref = this.dialog.open(AiRecipeDialogComponent, {
+      width: '680px',
+      maxWidth: '96vw',
+      data: {
+        date: this.selectedDate(),
+        defaultMealType: mealType ?? MealType.Breakfast,
+        suggestedCalories: suggested
+      }
+    });
+
+    ref.afterClosed().subscribe((res) => {
+      if (res?.applied) {
+        this.snackBar.open(
+          `Pomyślnie dodano przepis "${res.title}" (${res.count} składników) do dziennika!`,
+          'Super!',
+          { duration: 4000 }
+        );
+        this.loadDiary();
+      }
+    });
   }
 
   openAddFoodDialog(meal: MealGroupDto): void {
