@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { debounceTime } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
@@ -52,7 +53,7 @@ import { MacroApiService } from '../../core/services/macro-api.service';
           <form [formGroup]="profileForm" (ngSubmit)="onSave()" class="calc-form">
             <div class="gender-row">
               <label class="field-label">Płeć:</label>
-              <mat-radio-group formControlName="gender" (change)="recalculatePreview()">
+              <mat-radio-group formControlName="gender">
                 <mat-radio-button [value]="Gender.Male">Mężczyzna</mat-radio-button>
                 <mat-radio-button [value]="Gender.Female">Kobieta</mat-radio-button>
               </mat-radio-group>
@@ -61,39 +62,23 @@ import { MacroApiService } from '../../core/services/macro-api.service';
             <div class="grid-3">
               <mat-form-field appearance="outline">
                 <mat-label>Wiek (lata)</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="age"
-                  (input)="recalculatePreview()"
-                />
+                <input matInput type="number" formControlName="age" />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Masa ciała (kg)</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  step="0.5"
-                  formControlName="weightKg"
-                  (input)="recalculatePreview()"
-                />
+                <input matInput type="number" step="0.5" formControlName="weightKg" />
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Wzrost (cm)</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="heightCm"
-                  (input)="recalculatePreview()"
-                />
+                <input matInput type="number" formControlName="heightCm" />
               </mat-form-field>
             </div>
 
             <mat-form-field appearance="outline">
               <mat-label>Poziom aktywności fizycznej (PAL)</mat-label>
-              <mat-select formControlName="activityLevel" (selectionChange)="recalculatePreview()">
+              <mat-select formControlName="activityLevel">
                 <mat-option [value]="ActivityLevel.Sedentary">
                   Siedzący (1.2) — praca biurowa, brak treningów
                 </mat-option>
@@ -114,7 +99,7 @@ import { MacroApiService } from '../../core/services/macro-api.service';
 
             <mat-form-field appearance="outline">
               <mat-label>Twój cel sylwetkowy</mat-label>
-              <mat-select formControlName="goal" (selectionChange)="recalculatePreview()">
+              <mat-select formControlName="goal">
                 <mat-option [value]="DietGoal.Cut">
                   Redukcja tkanki tłuszczowej (-15% kalorii, wyższe białko 2.0g/kg)
                 </mat-option>
@@ -408,6 +393,11 @@ export class CalculatorComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Reaktywne odpytywanie API z debouncem przy zmianach w formularzu
+    this.profileForm.valueChanges
+      .pipe(debounceTime(250))
+      .subscribe(() => this.recalculatePreview());
+
     this.recalculatePreview();
 
     this.api.getProfile().subscribe({
@@ -427,38 +417,13 @@ export class CalculatorComponent implements OnInit {
 
   recalculatePreview(): void {
     if (this.profileForm.invalid) return;
-    const v = this.profileForm.getRawValue();
 
-    // Obliczenie lokalne (identyczny wzór Mifflin-St Jeor jak na backendzie) dla natychmiastowej responsywności UI
-    const genderOffset = v.gender === Gender.Male ? 5 : -161;
-    const bmrRaw = 10 * v.weightKg + 6.25 * v.heightCm - 5 * v.age + genderOffset;
-    const bmr = Math.round(bmrRaw);
-
-    const palMap: Record<ActivityLevel, number> = {
-      [ActivityLevel.Sedentary]: 1.2,
-      [ActivityLevel.LightlyActive]: 1.375,
-      [ActivityLevel.ModeratelyActive]: 1.55,
-      [ActivityLevel.VeryActive]: 1.725,
-      [ActivityLevel.ExtraActive]: 1.9
-    };
-
-    const tdee = Math.round(bmrRaw * (palMap[v.activityLevel] ?? 1.55));
-    const goalMult = v.goal === DietGoal.Cut ? 0.85 : v.goal === DietGoal.Bulk ? 1.12 : 1.0;
-    const targetCalories = Math.max(1200, Math.round(tdee * goalMult));
-
-    const proteinPerKg = v.goal === DietGoal.Cut ? 2.0 : 1.8;
-    const proteinGrams = Math.round(v.weightKg * proteinPerKg);
-    const fatGrams = Math.max(Math.round(v.weightKg * 0.8), Math.round((targetCalories * 0.27) / 9));
-    const remainingKcal = Math.max(200, targetCalories - proteinGrams * 4 - fatGrams * 9);
-    const carbsGrams = Math.round(remainingKcal / 4);
-
-    this.preview.set({
-      bmrCalories: bmr,
-      tdeeCalories: tdee,
-      targetCalories,
-      targetProteinGrams: proteinGrams,
-      targetCarbsGrams: carbsGrams,
-      targetFatGrams: fatGrams
+    // Pobranie kalkulacji z backendu (.NET Domain Layer - MacroCalculator)
+    this.api.previewCalculation(this.profileForm.getRawValue()).subscribe({
+      next: (result) => this.preview.set(result),
+      error: () => {
+        // Cichy błąd jeśli API jeszcze się uruchamia lub trwają zmiany
+      }
     });
   }
 
