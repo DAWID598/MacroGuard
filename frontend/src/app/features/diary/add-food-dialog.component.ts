@@ -409,6 +409,7 @@ export class AddFoodDialogComponent implements OnInit {
 
   readonly categories = [
     'Wszystkie',
+    'Tłuszcze i Oleje',
     'Mięso i Ryby',
     'Nabiał i Jaja',
     'Zboża i Pieczywo',
