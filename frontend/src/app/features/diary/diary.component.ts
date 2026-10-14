@@ -37,7 +37,10 @@ import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
       <div class="diary-header">
         <div>
           <h1>Dziennik Żywieniowy</h1>
-          <p class="subtitle">Monitoruj dzienne spożycie kalorii i makroskładników w 4 posiłkach</p>
+          <p class="subtitle">
+            Monitoruj dzienne spożycie kalorii i makroskładników w 4 posiłkach
+            · <a routerLink="/guide" class="guide-link">Nie wiesz jak zacząć? Przewodnik</a>
+          </p>
         </div>
 
         <div class="header-actions">
@@ -252,6 +255,16 @@ import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
         margin: 0;
         color: #64748b;
         font-size: 14px;
+
+        .guide-link {
+          color: #4f46e5;
+          text-decoration: none;
+          font-weight: 600;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
       }
     }
 

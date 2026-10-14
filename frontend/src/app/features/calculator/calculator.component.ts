@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { debounceTime } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -25,6 +25,7 @@ import { MacroApiService } from '../../core/services/macro-api.service';
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -39,10 +40,18 @@ import { MacroApiService } from '../../core/services/macro-api.service';
   template: `
     <div class="page-container">
       <div class="calc-header">
-        <h1>Kalkulator Zapotrzebowania (BMR / TDEE) i Profil</h1>
-        <p>
-          Wylicz swoje dzienne zapotrzebowanie kaloryczne wg wzoru <strong>Mifflin-St Jeor</strong> oraz optymalny rozkład białka, węglowodanów i tłuszczów.
-        </p>
+        <div class="header-content">
+          <div>
+            <h1>Kalkulator Zapotrzebowania (BMR / TDEE) i Profil</h1>
+            <p>
+              Wylicz swoje dzienne zapotrzebowanie kaloryczne wg wzoru <strong>Mifflin-St Jeor</strong> oraz optymalny rozkład białka, węglowodanów i tłuszczów.
+            </p>
+          </div>
+          <a mat-stroked-button color="primary" routerLink="/guide" class="guide-header-btn">
+            <mat-icon>school</mat-icon>
+            Przewodnik: Jak działa BMR & TDEE?
+          </a>
+        </div>
       </div>
 
       <div class="calc-layout">
@@ -179,6 +188,15 @@ import { MacroApiService } from '../../core/services/macro-api.service';
   styles: [`
     .calc-header {
       margin-bottom: 24px;
+
+      .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
       h1 {
         margin: 0 0 6px;
         font-size: 26px;
@@ -189,6 +207,12 @@ import { MacroApiService } from '../../core/services/macro-api.service';
         margin: 0;
         color: #64748b;
         font-size: 14px;
+      }
+
+      .guide-header-btn {
+        border-radius: 10px;
+        font-weight: 600;
+        height: 40px;
       }
     }
 

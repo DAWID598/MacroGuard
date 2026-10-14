@@ -31,6 +31,13 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
   ```
   *(Jeśli pole `ApiKey` i `BaseUrl` pozostaną puste, generator automatycznie korzysta z wbudowanego kulinarnego silnika MacroGuard offline).*
 
+### 2. Przewodnik Żywieniowy & Baza Wiedzy (Edukacja od A do Z)
+- **Kompleksowa strefa wiedzy dla każdego:** Napisana prostym, przystępnym, ludzkim językiem bez trudnego żargonu medycznego.
+- **Kalorie i Bilans:** Objaśnienie jak działa metabolizm (BMR, TDEE) oraz dlaczego głodówki niszczą sylwetkę, a zdrowy deficyt daje trwałe rezultaty.
+- **Makroskładniki (B/W/T):** Szczegółowe omówienie roli białka (król sytości i ochrona mięśni), węglowodanów (energia dla mózgu i ruchu) oraz tłuszczów (zdrowie hormonalne).
+- **Poradnik w 4 Krokach:** Praktyczna instrukcja jak korzystać z wagi kuchennej, kalkulatora i dziennika.
+- **Interaktywne FAQ i Obalanie Mitów:** Jedzenie po 18:00, wahania wagi z dnia na dzień, mit owoców, zasada 80/20.
+
 ---
 
 ## Szybki Start

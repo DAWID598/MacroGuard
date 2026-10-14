@@ -28,6 +28,10 @@ import { AuthService } from './core/services/auth.service';
               <mat-icon>calculate</mat-icon>
               Kalkulator BMR/TDEE
             </a>
+            <a mat-button routerLink="/guide" routerLinkActive="active-link">
+              <mat-icon>school</mat-icon>
+              Baza Wiedzy
+            </a>
           </div>
 
           <div class="user-actions">
