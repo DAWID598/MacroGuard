@@ -195,3 +195,41 @@ export interface ApplyRecipeRequest {
   ingredients: RecipeIngredientDto[];
 }
 
+export interface LogWeightRequest {
+  date: string;
+  weightKg: number;
+  note?: string | null;
+}
+
+export interface WeightEntryDto {
+  id: string;
+  date: string;
+  weightKg: number;
+  note?: string | null;
+  createdAtUtc: string;
+}
+
+export interface WeeklyWeightStatDto {
+  year: number;
+  weekNumber: number;
+  startDate: string;
+  endDate: string;
+  averageWeightKg: number;
+  changeFromPreviousWeekKg?: number | null;
+  entriesCount: number;
+}
+
+export interface WeightStatsSummaryDto {
+  currentWeightKg?: number | null;
+  lastRecordedDate?: string | null;
+  startingWeightKg?: number | null;
+  startingDate?: string | null;
+  totalChangeKg?: number | null;
+  averageThisWeekKg?: number | null;
+  averageLastWeekKg?: number | null;
+  weeklyChangeKg?: number | null;
+  weeklyStats: WeeklyWeightStatDto[];
+  recentEntries: WeightEntryDto[];
+}
+
+

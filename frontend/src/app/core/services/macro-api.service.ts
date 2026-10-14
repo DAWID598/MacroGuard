@@ -11,9 +11,12 @@ import {
   FoodItemDto,
   GenerateRecipeRequest,
   GeneratedRecipeDto,
+  LogWeightRequest,
   MacroCalculationResult,
   MealEntryDto,
-  UserProfileDto
+  UserProfileDto,
+  WeightEntryDto,
+  WeightStatsSummaryDto
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -75,6 +78,27 @@ export class MacroApiService {
 
   getAiInfo(): Observable<AiInfoDto> {
     return this.http.get<AiInfoDto>(`${this.baseUrl}/recipes/ai-info`);
+  }
+
+  // Waga i Statystyki Postępów
+  logWeight(request: LogWeightRequest): Observable<WeightEntryDto> {
+    return this.http.post<WeightEntryDto>(`${this.baseUrl}/weights`, request);
+  }
+
+  getWeightStats(): Observable<WeightStatsSummaryDto> {
+    return this.http.get<WeightStatsSummaryDto>(`${this.baseUrl}/weights/stats`);
+  }
+
+  getWeightHistory(days?: number): Observable<WeightEntryDto[]> {
+    let params = new HttpParams();
+    if (days !== undefined && days !== null) {
+      params = params.set('days', days.toString());
+    }
+    return this.http.get<WeightEntryDto[]>(`${this.baseUrl}/weights/history`, { params });
+  }
+
+  deleteWeightEntry(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/weights/${id}`);
   }
 }
 

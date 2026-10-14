@@ -49,6 +49,11 @@ import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
             Nie masz pomysłu? Wygeneruj posiłek
           </button>
 
+          <a mat-stroked-button routerLink="/stats" class="weight-link-btn" matTooltip="Śledź poranną wagę i średnie tygodniowe">
+            <mat-icon>scale</mat-icon>
+            Waga & Postępy
+          </a>
+
           <div class="date-navigator">
             <button mat-icon-button (click)="shiftDate(-1)" matTooltip="Poprzedni dzień">
               <mat-icon>chevron_left</mat-icon>
@@ -273,6 +278,24 @@ import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
+    }
+
+    .weight-link-btn {
+      background: #ffffff !important;
+      color: #2563eb !important;
+      border-color: #bfdbfe !important;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 0 14px;
+      height: 42px;
+
+      &:hover {
+        background: #eff6ff !important;
+      }
+
+      mat-icon {
+        margin-right: 6px;
+      }
     }
 
     .ai-generator-btn {

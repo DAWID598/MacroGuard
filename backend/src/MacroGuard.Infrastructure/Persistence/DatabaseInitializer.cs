@@ -18,6 +18,19 @@ public static class DatabaseInitializer
 
         await context.Database.EnsureCreatedAsync();
 
+        // Upewnij się, że tabela WeightEntries istnieje (jeśli baza już istniała wcześniej)
+        await context.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS "WeightEntries" (
+                "Id" uuid NOT NULL PRIMARY KEY,
+                "UserId" uuid NOT NULL,
+                "Date" date NOT NULL,
+                "WeightKg" numeric(5,2) NOT NULL,
+                "Note" character varying(200),
+                "CreatedAtUtc" timestamp with time zone NOT NULL
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS "IX_WeightEntries_UserId_Date" ON "WeightEntries" ("UserId", "Date");
+        """);
+
         // 1. Bogata baza popularnych produktów spożywczych (w tym tłuszcze i oleje do smażenia)
         var defaultFoods = GetDefaultFoods();
         var existingNames = await context.FoodItems
@@ -75,6 +88,51 @@ public static class DatabaseInitializer
             goal: DietGoal.Cut,
             seedSampleMeals: true
         );
+
+        // 5. Seed przykładowych pomiarów wagi dla konta testowego (ostatnie 21 dni)
+        var testUser = await userManager.FindByEmailAsync("test@macroguard.pl");
+        if (testUser is not null && !await context.WeightEntries.AnyAsync(w => w.UserId == testUser.Id))
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var sampleWeights = new (int daysAgo, decimal weight, string? note)[]
+            {
+                (20, 79.8m, "Początek pomiarów"),
+                (19, 79.9m, null),
+                (18, 79.6m, null),
+                (17, 79.5m, "Po treningu"),
+                (16, 79.7m, "Po słonej kolacji"),
+                (15, 79.3m, null),
+                (14, 79.2m, null),
+                (13, 79.0m, null),
+                (12, 79.1m, null),
+                (11, 78.8m, "Lekki spadek"),
+                (10, 78.9m, null),
+                (9, 78.6m, null),
+                (8, 78.7m, null),
+                (7, 78.5m, null),
+                (6, 78.4m, null),
+                (5, 78.3m, "Na czczo"),
+                (4, 78.4m, null),
+                (3, 78.2m, null),
+                (2, 78.1m, null),
+                (1, 78.0m, null),
+                (0, 77.9m, "Dziś rano")
+            };
+
+            foreach (var item in sampleWeights)
+            {
+                context.WeightEntries.Add(new WeightEntry
+                {
+                    UserId = testUser.Id,
+                    Date = today.AddDays(-item.daysAgo),
+                    WeightKg = item.weight,
+                    Note = item.note,
+                    CreatedAtUtc = DateTime.UtcNow.AddDays(-item.daysAgo)
+                });
+            }
+
+            await context.SaveChangesAsync();
+        }
     }
 
     private static List<FoodItem> GetDefaultFoods() =>

@@ -63,6 +63,7 @@ public static class DependencyInjection
         services.AddScoped<IDiaryService, DiaryService>();
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddScoped<IRecipeService, RecipeService>();
+        services.AddScoped<IWeightService, WeightService>();
 
         return services;
     }

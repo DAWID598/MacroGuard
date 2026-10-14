@@ -12,6 +12,7 @@ public class MacroGuardDbContext(DbContextOptions<MacroGuardDbContext> options)
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<FoodItem> FoodItems => Set<FoodItem>();
     public DbSet<MealEntry> MealEntries => Set<MealEntry>();
+    public DbSet<WeightEntry> WeightEntries => Set<WeightEntry>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -47,6 +48,14 @@ public class MacroGuardDbContext(DbContextOptions<MacroGuardDbContext> options)
                 .WithMany()
                 .HasForeignKey(x => x.FoodItemId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<WeightEntry>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => new { x.UserId, x.Date }).IsUnique();
+            entity.Property(x => x.WeightKg).HasPrecision(5, 2);
+            entity.Property(x => x.Note).HasMaxLength(200);
         });
     }
 }

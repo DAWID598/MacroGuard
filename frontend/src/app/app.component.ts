@@ -24,6 +24,10 @@ import { AuthService } from './core/services/auth.service';
               <mat-icon>menu_book</mat-icon>
               Dziennik (4 posiłki)
             </a>
+            <a mat-button routerLink="/stats" routerLinkActive="active-link">
+              <mat-icon>show_chart</mat-icon>
+              Waga & Postępy
+            </a>
             <a mat-button routerLink="/calculator" routerLinkActive="active-link">
               <mat-icon>calculate</mat-icon>
               Kalkulator BMR/TDEE

@@ -38,6 +38,13 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
 - **Poradnik w 4 Krokach:** Praktyczna instrukcja jak korzystać z wagi kuchennej, kalkulatora i dziennika.
 - **Interaktywne FAQ i Obalanie Mitów:** Jedzenie po 18:00, wahania wagi z dnia na dzień, mit owoców, zasada 80/20.
 
+### 3. Waga & Statystyki Postępów (Rejestracja porannej wagi i wykresy)
+- **Opcjonalna rejestracja porannej wagi:** Formularz z precyzyjną regulacją przyciskami `+/- 0.1 kg` oraz `+/- 0.5 kg`, polem notatki i automatyczną aktualizacją bieżącej wagi w profilu.
+- **Wykresy i realne trendy (SVG):** Interaktywny wykres liniowy z cieniowanym gradientem, punktami pomiarowymi z podpowiedziami (tooltips) i filtrami czasowymi: *14 dni*, *30 dni*, *90 dni* oraz *Wszystkie*.
+- **Średnie tygodniowe (Eliminacja szumu wody):** Prezentacja kluczowego wskaźnika redukcji/masy — porównanie średniej z bieżącego tygodnia z poprzednim tygodniem (*„Waga skacze z dnia na dzień przez sól i wodę — patrz na średnie tygodniowe”*).
+- **Karty metryk KPI:** Ostatnia waga, Całkowity postęp od startu, Średnia w tym tygodniu oraz Tempo zmian tydzień do tygodnia z oceną.
+- **Historia i edycja:** Tabela zarejestrowanych pomiarów z możliwością usuwania wpisów.
+
 ---
 
 ## Szybki Start
