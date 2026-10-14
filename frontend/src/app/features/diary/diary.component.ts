@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,8 +10,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { DailyDiaryDto, MealGroupDto, MealType } from '../../core/models/api.models';
 import { MacroApiService } from '../../core/services/macro-api.service';
+import { DiaryStateService } from '../../core/services/diary-state.service';
 import { AddFoodDialogComponent } from './add-food-dialog.component';
 import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
 import { ReportDialogComponent } from './report-dialog.component';
@@ -30,7 +32,8 @@ import { ReportDialogComponent } from './report-dialog.component';
     MatDividerModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule
   ],
   template: `
     <div class="page-container">
@@ -39,7 +42,7 @@ import { ReportDialogComponent } from './report-dialog.component';
         <div>
           <h1>Dziennik Żywieniowy</h1>
           <p class="subtitle">
-            Monitoruj dzienne spożycie kalorii i makroskładników w 4 posiłkach
+            Monitoruj dzienne spożycie kalorii i makroskładników w posiłkach
             · <a routerLink="/guide" class="guide-link">Nie wiesz jak zacząć? Przewodnik</a>
           </p>
         </div>
@@ -161,9 +164,9 @@ import { ReportDialogComponent } from './report-dialog.component';
           </div>
         </mat-card>
 
-        <!-- 4 POSIŁKI: ŚNIADANIE, OBIAD, PRZEKĄSKA, KOLACJA -->
+        <!-- POSIŁKI W CIĄGU DNIA -->
         <div class="meals-grid">
-          @for (meal of d.meals; track meal.mealType) {
+          @for (meal of displayedMeals(); track meal.mealType) {
             <mat-card class="meal-card" appearance="outlined">
               <div class="meal-card-header">
                 <div class="meal-title-group">
@@ -182,6 +185,17 @@ import { ReportDialogComponent } from './report-dialog.component';
                 </div>
 
                 <div class="meal-actions">
+                  @if (isExtraMeal(meal.mealType) && meal.entries.length === 0) {
+                    <button
+                      mat-icon-button
+                      class="icon-action-btn delete-meal-btn"
+                      matTooltip="Usuń ten dodatkowy posiłek"
+                      (click)="removeExtraMeal(meal.mealType)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  }
+
                   @if (meal.entries.length > 0) {
                     <button
                       mat-icon-button
@@ -262,6 +276,28 @@ import { ReportDialogComponent } from './report-dialog.component';
               </div>
             </mat-card>
           }
+        </div>
+
+        <!-- PRZYCISK DODAWANIA KOLEJNEGO POSIŁKU -->
+        <div class="add-extra-meal-container">
+          <button
+            mat-stroked-button
+            color="primary"
+            [matMenuTriggerFor]="addMealMenu"
+            class="add-extra-meal-btn"
+            [disabled]="availableExtraMeals().length === 0"
+          >
+            <mat-icon>add_circle_outline</mat-icon>
+            Dodaj kolejny posiłek
+          </button>
+          <mat-menu #addMealMenu="matMenu">
+            @for (opt of availableExtraMeals(); track opt.type) {
+              <button mat-menu-item (click)="addExtraMeal(opt.type)">
+                <mat-icon>{{ opt.icon }}</mat-icon>
+                <span>{{ opt.label }}</span>
+              </button>
+            }
+          </mat-menu>
         </div>
       }
     </div>
@@ -624,6 +660,39 @@ import { ReportDialogComponent } from './report-dialog.component';
       }
     }
 
+    .delete-meal-btn {
+      color: #94a3b8;
+      &:hover {
+        color: #ef4444;
+        background: #fee2e2;
+      }
+    }
+
+    .add-extra-meal-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 16px;
+      margin-bottom: 24px;
+
+      .add-extra-meal-btn {
+        height: 44px;
+        border-radius: 12px;
+        font-weight: 600;
+        border-style: dashed;
+        border-width: 2px;
+        padding: 0 24px;
+        background: #f8fafc;
+
+        mat-icon {
+          margin-right: 6px;
+        }
+
+        &:hover:not([disabled]) {
+          background: #eef2ff;
+        }
+      }
+    }
+
     .empty-meal {
       padding: 22px 0 12px;
       text-align: center;
@@ -636,9 +705,74 @@ export class DiaryComponent implements OnInit {
   private readonly api = inject(MacroApiService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly diaryState = inject(DiaryStateService);
+
+  constructor() {
+    effect(() => {
+      const count = this.displayedMeals().length;
+      if (count > 0) {
+        this.diaryState.updateMealsCount(count);
+      }
+    });
+  }
+
+  private readonly PERSISTENT_MEALS_KEY = 'macroguard_persistent_meals';
+
+  readonly allExtraMealDefinitions = [
+    { type: MealType.SecondBreakfast, label: 'II Śniadanie', icon: 'brunch_dining' },
+    { type: MealType.AfternoonSnack, label: 'Podwieczorek', icon: 'free_breakfast' },
+    { type: MealType.PreWorkout, label: 'Posiłek przedtreningowy', icon: 'bolt' },
+    { type: MealType.PostWorkout, label: 'Posiłek potreningowy', icon: 'fitness_center' },
+    { type: MealType.ExtraMeal, label: 'Dodatkowy posiłek', icon: 'add_task' },
+    { type: MealType.Drinks, label: 'Napoje i Płyny', icon: 'local_drink' }
+  ];
+
+  readonly persistentExtraMeals = signal<MealType[]>(this.loadPersistentMeals());
+  readonly dayExtraMealsByDate = signal<Record<string, MealType[]>>({});
+
+  readonly dayExtraMeals = computed<MealType[]>(() => {
+    return this.dayExtraMealsByDate()[this.selectedDate()] ?? [];
+  });
 
   readonly selectedDate = signal<string>(this.formatToday());
   readonly diary = signal<DailyDiaryDto | null>(null);
+
+  readonly displayedMeals = computed<MealGroupDto[]>(() => {
+    const d = this.diary();
+    if (!d) return [];
+
+    const backendMeals = d.meals ?? [];
+    const activeTypes = new Set<MealType>(backendMeals.map(m => m.mealType));
+
+    const extraCandidates = [
+      ...this.persistentExtraMeals(),
+      ...this.dayExtraMeals()
+    ];
+
+    const result: MealGroupDto[] = [...backendMeals];
+
+    for (const extraType of extraCandidates) {
+      if (!activeTypes.has(extraType)) {
+        activeTypes.add(extraType);
+        result.push({
+          mealType: extraType,
+          mealName: this.getMealLabel(extraType),
+          totalCalories: 0,
+          totalProtein: 0,
+          totalCarbs: 0,
+          totalFat: 0,
+          entries: []
+        });
+      }
+    }
+
+    return result.sort((a, b) => this.getMealSortOrder(a.mealType) - this.getMealSortOrder(b.mealType));
+  });
+
+  readonly availableExtraMeals = computed(() => {
+    const currentTypes = new Set(this.displayedMeals().map(m => m.mealType));
+    return this.allExtraMealDefinitions.filter(def => !currentTypes.has(def.type));
+  });
 
   readonly remainingKcal = computed(() => {
     const d = this.diary();
@@ -679,19 +813,150 @@ export class DiaryComponent implements OnInit {
     return Math.min(100, Math.round((consumed / target) * 100));
   }
 
+  isExtraMeal(type: MealType): boolean {
+    return type === MealType.SecondBreakfast ||
+           type === MealType.AfternoonSnack ||
+           type === MealType.PreWorkout ||
+           type === MealType.PostWorkout ||
+           type === MealType.ExtraMeal ||
+           type === MealType.Drinks;
+  }
+
+  getMealSortOrder(type: MealType): number {
+    switch (type) {
+      case MealType.Breakfast: return 1;
+      case MealType.SecondBreakfast: return 2;
+      case MealType.Lunch: return 3;
+      case MealType.AfternoonSnack: return 4;
+      case MealType.Dinner: return 5;
+      case MealType.Snack: return 6;
+      case MealType.PreWorkout: return 7;
+      case MealType.PostWorkout: return 8;
+      case MealType.ExtraMeal: return 9;
+      case MealType.Drinks: return 10;
+      default: return 99;
+    }
+  }
+
+  getMealLabel(mealType: MealType): string {
+    switch (mealType) {
+      case MealType.Breakfast: return 'Śniadanie';
+      case MealType.SecondBreakfast: return 'II Śniadanie';
+      case MealType.Lunch: return 'Obiad';
+      case MealType.AfternoonSnack: return 'Podwieczorek';
+      case MealType.Dinner: return 'Kolacja';
+      case MealType.Snack: return 'Przekąska';
+      case MealType.PreWorkout: return 'Posiłek przedtreningowy';
+      case MealType.PostWorkout: return 'Posiłek potreningowy';
+      case MealType.ExtraMeal: return 'Dodatkowy posiłek';
+      case MealType.Drinks: return 'Napoje i Płyny';
+      default: return 'Posiłek';
+    }
+  }
+
   getMealIcon(mealType: MealType): string {
     switch (mealType) {
       case MealType.Breakfast:
         return 'wb_sunny';
+      case MealType.SecondBreakfast:
+        return 'brunch_dining';
       case MealType.Lunch:
         return 'restaurant';
-      case MealType.Snack:
-        return 'cookie';
+      case MealType.AfternoonSnack:
+        return 'free_breakfast';
       case MealType.Dinner:
         return 'nights_stay';
+      case MealType.Snack:
+        return 'cookie';
+      case MealType.PreWorkout:
+        return 'bolt';
+      case MealType.PostWorkout:
+        return 'fitness_center';
+      case MealType.ExtraMeal:
+        return 'add_task';
+      case MealType.Drinks:
+        return 'local_drink';
       default:
         return 'fastfood';
     }
+  }
+
+  addExtraMeal(type: MealType): void {
+    const date = this.selectedDate();
+    const current = this.dayExtraMealsByDate()[date] ?? [];
+    if (!current.includes(type)) {
+      this.dayExtraMealsByDate.update(map => ({
+        ...map,
+        [date]: [...current, type]
+      }));
+    }
+
+    const def = this.allExtraMealDefinitions.find(d => d.type === type);
+    const label = def?.label ?? 'Dodatkowy posiłek';
+
+    if (!this.persistentExtraMeals().includes(type)) {
+      const ref = this.snackBar.open(
+        `Dodano posiłek "${label}". Czy chcesz wyświetlać go codziennie?`,
+        'Tak, codziennie',
+        { duration: 7000 }
+      );
+      ref.onAction().subscribe(() => {
+        this.togglePersistentMeal(type, true);
+      });
+    } else {
+      this.snackBar.open(`Dodano posiłek "${label}".`, 'OK', { duration: 3000 });
+    }
+  }
+
+  togglePersistentMeal(type: MealType, enable: boolean): void {
+    const current = this.persistentExtraMeals();
+    let updated: MealType[];
+    if (enable) {
+      updated = current.includes(type) ? current : [...current, type];
+    } else {
+      updated = current.filter(t => t !== type);
+    }
+    this.persistentExtraMeals.set(updated);
+    this.savePersistentMeals(updated);
+
+    const def = this.allExtraMealDefinitions.find(d => d.type === type);
+    const label = def?.label ?? 'Posiłek';
+    if (enable) {
+      this.snackBar.open(`Posiłek "${label}" będzie teraz wyświetlany każdego dnia!`, 'Świetnie', { duration: 4000 });
+    }
+  }
+
+  removeExtraMeal(type: MealType): void {
+    const date = this.selectedDate();
+    const current = this.dayExtraMealsByDate()[date] ?? [];
+    this.dayExtraMealsByDate.update(map => ({
+      ...map,
+      [date]: current.filter(t => t !== type)
+    }));
+
+    if (this.persistentExtraMeals().includes(type)) {
+      this.togglePersistentMeal(type, false);
+    }
+
+    const def = this.allExtraMealDefinitions.find(d => d.type === type);
+    this.snackBar.open(`Usunięto posiłek "${def?.label ?? ''}".`, 'OK', { duration: 3000 });
+  }
+
+  private loadPersistentMeals(): MealType[] {
+    try {
+      const raw = localStorage.getItem(this.PERSISTENT_MEALS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed as MealType[];
+      }
+    } catch {}
+    return [];
+  }
+
+  private savePersistentMeals(meals: MealType[]): void {
+    try {
+      localStorage.setItem(this.PERSISTENT_MEALS_KEY, JSON.stringify(meals));
+    } catch {}
   }
 
   openAiGenerator(mealType?: MealType): void {

@@ -1,10 +1,11 @@
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from './core/services/auth.service';
+import { DiaryStateService } from './core/services/diary-state.service';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +23,7 @@ import { AuthService } from './core/services/auth.service';
           <div class="nav-links">
             <a mat-button routerLink="/diary" routerLinkActive="active-link">
               <mat-icon>menu_book</mat-icon>
-              Dziennik (4 posiłki)
+              {{ diaryNavLabel() }}
             </a>
             <a mat-button routerLink="/stats" routerLinkActive="active-link">
               <mat-icon>show_chart</mat-icon>
@@ -125,4 +126,12 @@ import { AuthService } from './core/services/auth.service';
 })
 export class AppComponent {
   readonly authService = inject(AuthService);
+  private readonly diaryState = inject(DiaryStateService);
+
+  readonly diaryNavLabel = computed(() => {
+    const count = this.diaryState.activeMealsCount();
+    if (count === 1) return 'Dziennik (1 posiłek)';
+    if (count >= 2 && count <= 4) return `Dziennik (${count} posiłki)`;
+    return `Dziennik (${count} posiłków)`;
+  });
 }

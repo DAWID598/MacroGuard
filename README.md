@@ -75,7 +75,53 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
   - *Własny %* — możliwość wpisania dowolnego cięcia kalorii (5% – 35%)
 - **Prognoza osiągnięcia celu:** Szacowany czas w tygodniach i miesiącach oraz orientacyjny termin osiągnięcia wymarzonej sylwetki.
 - **Ochrona metabolizmu:** Ostrzeżenie, jeśli wybrane tempo redukcji schodzi poniżej BMR (podstawowej przemiany materii).
-- **Banner w widoku Waga & Postępy:** Dynamiczny kafelek pokazujący ile kg pozostało do osiągnięcia celu wraz z szybkim przejściem do edycji.
+### 9. Praca Fizyczna, Trening Siłowy na Masie & Baza Wiedzy o Treningu
+- **Dedykowany poziom aktywności dla pracy fizycznej (PAL = 1.6):**
+  - Opcja w kalkulatorze BMR/TDEE: *„🛠️ Sama praca fizyczna bez treningów (1.6) — magazyn, budowa, kurier, gastronomia (cały dzień w ruchu)”*.
+  - Eliminuje dylemat użytkowników wykonujących ciężką pracę fizyczną, którzy nie trenują na siłowni, a dotychczas musieli wybierać opcje powiązane z dniami treningowymi.
+- **Wskazówki i ostrzeżenie przy budowie masy mięśniowej:**
+  - Dynamiczny boks informacyjny w kalkulatorze po wybraniu celu *„Budowa masy mięśniowej”*.
+  - Jasne wyjaśnienie, że nadwyżka kaloryczna bez regularnego bodźca siłowego zostanie odłożona w postaci tkanki tłuszczowej, dlatego kluczem jest trening oporowy oraz wysoka podaż białka.
+- **Moduł w Bazie Wiedzy (`/guide`):**
+  - Zakładka 4: **„4. Trening Siłowy & Mięśnie”** — dlaczego trening siłowy jest kluczowy na masie i redukcji, 3 filary sukcesu (Progressive Overload, Białko 1.8–2.2 g/kg, Sen 7–8h) oraz gotowy plan FBW.
+  - Zakładka 5: **„5. Mity i FAQ”** — obalanie mitów o jedzeniu po 18:00, skokach wagi z dnia na dzień, owocach, kardio i zasadzie 80/20 jako naturalne podsumowanie bazy wiedzy.
+
+### 10. Dynamiczne Dodawanie Posiłków (Więcej niż 4 posiłki w Dzienniku)
+- **Przycisk „+ Dodaj kolejny posiłek” w Dzienniku:**
+  - Domyślnie każdy dzień ma 4 posiłki bazowe (*Śniadanie, Obiad, Przekąska, Kolacja*).
+  - W dowolnym momencie użytkownik może kliknąć **„+ Dodaj kolejny posiłek”** i wybrać z menu:
+    - 🥐 **II Śniadanie**
+    - 🥪 **Podwieczorek**
+    - ⚡ **Posiłek przedtreningowy**
+    - 🏋️ **Posiłek potreningowy**
+    - 🍎 **Dodatkowy posiłek**
+    - 🥤 **Napoje i Płyny**
+- **Elastyczność jednorazowa vs stała:**
+  - Dodany posiłek pojawia się od razu w danym dniu w porządku chronologicznym.
+  - Aplikacja wyświetla powiadomienie z pytaniem *„Czy chcesz wyświetlać ten posiłek codziennie?”* z 1-kliknięciem *„Tak, codziennie”* (dla osób jedzących na co dzień 5–6 posiłków).
+  - Pusty dodatkowy posiłek można w każdej chwili usunąć przyciskiem `X`.
+- **Integracja w całej aplikacji:**
+  - Nowe posiłki w pełni współpracują z **Generatorem Przepisów AI**, oknem **Dodawania Produktów**, funkcją **Kopiuj z wczoraj** oraz **Zapisz jako zestaw**.
+
+### 11. Obsługa Napojów & Płynnych Kalorii
+- **Baza 20 popularnych napojów i płynów:**
+  - Dodano do seederów bazę artykułów: *Coca-Cola Original (10.6g cukru / 42 kcal)*, *Coca-Cola Zero (0 kcal)*, *Pepsi Max (0 kcal)*, *Pepsi*, *Fanta*, *Sprite*, *Soki 100%*, *Woda mineralna*, *Kawa czarna*, *Kawa z mlekiem*, *Latte*, *Herbaty*, *Energetyki klasyczne i Zero*, *Izotoniki*, *Piwo jasne* oraz *Piwo 0.0%*.
+- **Wygodne logowanie w mililitrach (ml):**
+  - W oknie dodawania produktu przy wyborze napoju jednostka zmienia się na `ml / g`, a podręczne przyciski oferują realne porcje: *150 ml (mała szklanka)*, *250 ml (szklanka)*, *330 ml (puszka)* oraz *500 ml (butelka)*.
+  - Napoje można dodawać bezpośrednio do dowolnego posiłku (śniadanie, obiad itp.) lub jako dedykowany kafel *„🥤 Napoje i Płyny”*.
+
+### 12. Dedykowany Rozdział „Popularne Pułapki — Na Co Uważać?” & Dynamiczny Pasek Nawigacji
+- **Nowy rozdział w Bazie Wiedzy (`/guide`):**
+  - Zakładka 5: **„5. Pułapki Dietetyczne — Na co uważać?”** (przed Mitami i FAQ) z 5 praktycznymi kartami:
+    1. *Płynne kalorie & słodzone napoje* (Coca-Cola 10.6g cukru/100ml, 140 kcal w puszce, soki, kawy smakowe vs. woda i napoje ZERO).
+    2. *Olej i oliwa wlewane na patelnię „na oko”* (100–120 kcal w łyżce, ukryte 350–400 kcal na patelni vs. waga kuchenna / spray).
+    3. *Zdrowe przekąski o ogromnej gęstości* (orzechy 600–650 kcal/100g, masło orzechowe 200 kcal/łyżka vs. ważenie porcji 20–25g).
+    4. *Sosy, gotowe dressingi i tradycyjny majonez* (dodatkowe 300 kcal w sałatce vs. baza ze skyru/jogurtu i majonez light).
+    5. *Bezwiedne podjadanie („Tylko jeden gryz”)* (300–500 kcal z niekontrolowanych kęsów vs. zasada „Co w ustach, to w Dzienniku”).
+  - Zakładka 6: **„6. Mity i FAQ”** jako zwieńczenie bazy wiedzy.
+- **Dynamiczny licznik posiłków w górnym menu (Navbar):**
+  - Pasek nawigacji na bieżąco dostosowuje etykietę: `Dziennik (1 posiłek)`, `Dziennik (X posiłki)`, `Dziennik (X posiłków)` w zależności od aktualnie wyświetlanej liczby posiłków w dzienniku.
+  - Dodanie lub usunięcie posiłku (np. *Napoje i Płyny*, *II Śniadanie*) natychmiast aktualizuje cyfrę w navbarze w czasie rzeczywistym.
 
 ---
 

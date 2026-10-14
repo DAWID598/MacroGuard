@@ -40,6 +40,7 @@ public static class MacroCalculator
             ActivityLevel.Sedentary => 1.2m,
             ActivityLevel.LightlyActive => 1.375m,
             ActivityLevel.ModeratelyActive => 1.55m,
+            ActivityLevel.PhysicalWork => 1.6m,
             ActivityLevel.VeryActive => 1.725m,
             ActivityLevel.ExtraActive => 1.9m,
             _ => 1.55m

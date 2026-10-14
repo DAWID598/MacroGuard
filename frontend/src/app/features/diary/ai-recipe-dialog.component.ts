@@ -155,9 +155,15 @@ export interface AiRecipeDialogData {
                 <mat-label>Posiłek</mat-label>
                 <mat-select formControlName="mealType">
                   <mat-option [value]="MealType.Breakfast">Śniadanie</mat-option>
+                  <mat-option [value]="MealType.SecondBreakfast">II Śniadanie</mat-option>
                   <mat-option [value]="MealType.Lunch">Obiad</mat-option>
-                  <mat-option [value]="MealType.Snack">Przekąska</mat-option>
+                  <mat-option [value]="MealType.AfternoonSnack">Podwieczorek</mat-option>
                   <mat-option [value]="MealType.Dinner">Kolacja</mat-option>
+                  <mat-option [value]="MealType.Snack">Przekąska</mat-option>
+                  <mat-option [value]="MealType.PreWorkout">Posiłek przedtreningowy</mat-option>
+                  <mat-option [value]="MealType.PostWorkout">Posiłek potreningowy</mat-option>
+                  <mat-option [value]="MealType.ExtraMeal">Dodatkowy posiłek</mat-option>
+                  <mat-option [value]="MealType.Drinks">Napoje i Koktajle</mat-option>
                 </mat-select>
               </mat-form-field>
 
@@ -699,9 +705,15 @@ export class AiRecipeDialogComponent implements OnInit {
   getMealLabel(type: MealType): string {
     switch (type) {
       case MealType.Breakfast: return 'Śniadanie';
+      case MealType.SecondBreakfast: return 'II Śniadanie';
       case MealType.Lunch: return 'Obiad';
-      case MealType.Snack: return 'Przekąska';
+      case MealType.AfternoonSnack: return 'Podwieczorek';
       case MealType.Dinner: return 'Kolacja';
+      case MealType.Snack: return 'Przekąska';
+      case MealType.PreWorkout: return 'Posiłek przedtreningowy';
+      case MealType.PostWorkout: return 'Posiłek potreningowy';
+      case MealType.ExtraMeal: return 'Dodatkowy posiłek';
+      case MealType.Drinks: return 'Napoje i Płyny';
       default: return 'Posiłek';
     }
   }

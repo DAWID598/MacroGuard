@@ -96,19 +96,22 @@ import { MacroApiService } from '../../core/services/macro-api.service';
               <mat-label>Poziom aktywności fizycznej (PAL)</mat-label>
               <mat-select formControlName="activityLevel">
                 <mat-option [value]="ActivityLevel.Sedentary">
-                  Siedzący (1.2) — praca biurowa, brak treningów
+                  Siedzący (1.2) — praca biurowa / zdalna, brak treningów (&lt; 5 tys. kroków)
                 </mat-option>
                 <mat-option [value]="ActivityLevel.LightlyActive">
-                  Lekka aktywność (1.375) — 1–3 treningi tygodniowo
+                  Lekka aktywność (1.375) — 1–3 treningi tygodniowo lub praca w ruchu / stojąca
                 </mat-option>
                 <mat-option [value]="ActivityLevel.ModeratelyActive">
-                  Umiarkowana aktywność (1.55) — 3–5 treningów tygodniowo
+                  Umiarkowana aktywność (1.55) — 3–5 regularnych treningów w tygodniu (siłownia, bieganie)
+                </mat-option>
+                <mat-option [value]="ActivityLevel.PhysicalWork">
+                  🛠️ Sama praca fizyczna bez treningów (1.6) — magazyn, budowa, kurier, gastronomia (cały dzień w ruchu)
                 </mat-option>
                 <mat-option [value]="ActivityLevel.VeryActive">
-                  Duża aktywność (1.725) — 6–7 intensywnych treningów
+                  Duża aktywność (1.725) — 6–7 ciężkich treningów LUB praca fizyczna + treningi
                 </mat-option>
                 <mat-option [value]="ActivityLevel.ExtraActive">
-                  Bardzo duża aktywność (1.9) — sport wyczynowy / praca fizyczna
+                  Ekstremalna aktywność (1.9) — ciężka praca fizyczna + codzienne treningi / sport zawodowy
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -263,6 +266,20 @@ import { MacroApiService } from '../../core/services/macro-api.service';
                     <strong>Konfiguracja celu budowy masy</strong>
                     <span>Określ docelową wagę i tempo nadwyżki</span>
                   </div>
+                </div>
+
+                <!-- WAŻNA WSKAZÓWKA O TRENINGU SIŁOWYM -->
+                <div class="strength-training-alert">
+                  <div class="alert-icon-title">
+                    <mat-icon>fitness_center</mat-icon>
+                    <strong>Kluczowa zasada: Do budowy mięśni niezbędny jest trening siłowy!</strong>
+                  </div>
+                  <p>
+                    Sama nadwyżka kaloryczna bez bodźca do wzrostu zamieni się w tkankę tłuszczową! 
+                    Aby budować <strong>mięśnie, a nie tłuszcz</strong>, połącz kalorie z <strong>treningiem siłowym</strong> 
+                    (siłownia, hantle, kalistenika z progresją obciążeń) oraz wysoką podażą <strong>białka</strong> 
+                    (1.8–2.2 g na każdy kilogram masy ciała).
+                  </p>
                 </div>
 
                 <div class="target-weight-input-row">
@@ -663,6 +680,42 @@ import { MacroApiService } from '../../core/services/macro-api.service';
         span {
           font-size: 12.5px;
           color: #64748b;
+        }
+      }
+
+      .strength-training-alert {
+        background: #ffffff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #2563eb;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+
+        .alert-icon-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #1d4ed8;
+          font-size: 13.5px;
+          margin-bottom: 4px;
+
+          mat-icon {
+            color: #2563eb;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        p {
+          margin: 0;
+          font-size: 12px;
+          color: #334155;
+          line-height: 1.5;
+
+          strong {
+            color: #0f172a;
+          }
         }
       }
 

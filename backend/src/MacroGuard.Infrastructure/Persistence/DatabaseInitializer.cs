@@ -269,7 +269,29 @@ public static class DatabaseInitializer
         new() { Name = "Czekolada gorzka 85%", Brand = "Wawel / Lindt", Category = "Odżywki i Przekąski", CaloriesPer100g = 580, ProteinPer100g = 11.0m, CarbsPer100g = 20.0m, FatPer100g = 48.0m },
         new() { Name = "Ketchup bez dodatku cukru", Brand = "Roleski / Kotlin", Category = "Odżywki i Przekąski", CaloriesPer100g = 45, ProteinPer100g = 1.5m, CarbsPer100g = 8.5m, FatPer100g = 0.2m },
         new() { Name = "Musztarda delikatesowa", Brand = "Kamis", Category = "Odżywki i Przekąski", CaloriesPer100g = 115, ProteinPer100g = 5.5m, CarbsPer100g = 7.5m, FatPer100g = 6.5m },
-        new() { Name = "Sos sojowy jasny", Brand = "Kikkoman", Category = "Odżywki i Przekąski", CaloriesPer100g = 53, ProteinPer100g = 8.0m, CarbsPer100g = 5.0m, FatPer100g = 0.1m }
+        new() { Name = "Sos sojowy jasny", Brand = "Kikkoman", Category = "Odżywki i Przekąski", CaloriesPer100g = 53, ProteinPer100g = 8.0m, CarbsPer100g = 5.0m, FatPer100g = 0.1m },
+
+        // === NAPOJE I PŁYNY (WODA, SOKI, COLA, KAWA, HERBATA) ===
+        new() { Name = "Coca-Cola Original (10.6g cukru / 100ml)", Brand = "Coca-Cola", Category = "Napoje i Płyny", CaloriesPer100g = 42, ProteinPer100g = 0m, CarbsPer100g = 10.6m, FatPer100g = 0m },
+        new() { Name = "Coca-Cola Zero Cukru", Brand = "Coca-Cola", Category = "Napoje i Płyny", CaloriesPer100g = 0, ProteinPer100g = 0m, CarbsPer100g = 0m, FatPer100g = 0m },
+        new() { Name = "Pepsi Max (Bez Cukru)", Brand = "Pepsi", Category = "Napoje i Płyny", CaloriesPer100g = 0, ProteinPer100g = 0m, CarbsPer100g = 0m, FatPer100g = 0m },
+        new() { Name = "Pepsi Original", Brand = "Pepsi", Category = "Napoje i Płyny", CaloriesPer100g = 44, ProteinPer100g = 0m, CarbsPer100g = 11.0m, FatPer100g = 0m },
+        new() { Name = "Sprite Original", Brand = "The Coca-Cola Company", Category = "Napoje i Płyny", CaloriesPer100g = 38, ProteinPer100g = 0m, CarbsPer100g = 9.1m, FatPer100g = 0m },
+        new() { Name = "Fanta Orange", Brand = "The Coca-Cola Company", Category = "Napoje i Płyny", CaloriesPer100g = 40, ProteinPer100g = 0m, CarbsPer100g = 9.7m, FatPer100g = 0m },
+        new() { Name = "Sok pomarańczowy 100%", Brand = "Tymbark / Hortex", Category = "Napoje i Płyny", CaloriesPer100g = 43, ProteinPer100g = 0.7m, CarbsPer100g = 9.8m, FatPer100g = 0.1m },
+        new() { Name = "Sok jabłkowy 100%", Brand = "Tymbark / Hortex", Category = "Napoje i Płyny", CaloriesPer100g = 45, ProteinPer100g = 0.1m, CarbsPer100g = 10.5m, FatPer100g = 0.1m },
+        new() { Name = "Woda mineralna (niegazowana / gazowana)", Brand = "Kropla Beskidu / Cisowianka", Category = "Napoje i Płyny", CaloriesPer100g = 0, ProteinPer100g = 0m, CarbsPer100g = 0m, FatPer100g = 0m },
+        new() { Name = "Kawa czarna / Espresso bez cukru", Brand = "Kawiarnia", Category = "Napoje i Płyny", CaloriesPer100g = 2, ProteinPer100g = 0.1m, CarbsPer100g = 0.3m, FatPer100g = 0m },
+        new() { Name = "Kawa z mlekiem 2% (bez cukru)", Brand = "Domowa", Category = "Napoje i Płyny", CaloriesPer100g = 25, ProteinPer100g = 1.6m, CarbsPer100g = 2.4m, FatPer100g = 1.0m },
+        new() { Name = "Kawa Latte / Cappuccino z mlekiem", Brand = "Kawiarnia", Category = "Napoje i Płyny", CaloriesPer100g = 48, ProteinPer100g = 2.8m, CarbsPer100g = 4.1m, FatPer100g = 2.3m },
+        new() { Name = "Herbata czarna / zielona bez cukru", Brand = "Napar", Category = "Napoje i Płyny", CaloriesPer100g = 1, ProteinPer100g = 0m, CarbsPer100g = 0.2m, FatPer100g = 0m },
+        new() { Name = "Herbata słodzona (1 łyżeczka cukru)", Brand = "Domowa", Category = "Napoje i Płyny", CaloriesPer100g = 20, ProteinPer100g = 0m, CarbsPer100g = 5.0m, FatPer100g = 0m },
+        new() { Name = "Napój energetyczny klasyczny", Brand = "Red Bull", Category = "Napoje i Płyny", CaloriesPer100g = 46, ProteinPer100g = 0m, CarbsPer100g = 11.0m, FatPer100g = 0m },
+        new() { Name = "Napój energetyczny bez cukru (Zero)", Brand = "Monster Ultra / Red Bull Zero", Category = "Napoje i Płyny", CaloriesPer100g = 3, ProteinPer100g = 0m, CarbsPer100g = 0.8m, FatPer100g = 0m },
+        new() { Name = "Napój izotoniczny", Brand = "Oshee / Powerade", Category = "Napoje i Płyny", CaloriesPer100g = 24, ProteinPer100g = 0m, CarbsPer100g = 5.5m, FatPer100g = 0m },
+        new() { Name = "Piwo jasne pełne 5% (alkoholowe)", Brand = "Browar", Category = "Napoje i Płyny", CaloriesPer100g = 43, ProteinPer100g = 0.5m, CarbsPer100g = 3.1m, FatPer100g = 0m },
+        new() { Name = "Piwo bezalkoholowe 0.0%", Brand = "Żywiec 0.0% / Heineken 0.0%", Category = "Napoje i Płyny", CaloriesPer100g = 24, ProteinPer100g = 0.3m, CarbsPer100g = 5.2m, FatPer100g = 0m },
+        new() { Name = "Mleko owsiane Barista", Brand = "Oatly / Alpro", Category = "Napoje i Płyny", CaloriesPer100g = 59, ProteinPer100g = 1.0m, CarbsPer100g = 6.5m, FatPer100g = 3.0m }
     ];
 
     private static async Task EnsureSeededUserAsync(

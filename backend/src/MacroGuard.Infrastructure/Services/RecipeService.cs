@@ -317,9 +317,15 @@ public class RecipeService(
         var mealName = req.MealType switch
         {
             MealType.Breakfast => "Śniadanie",
+            MealType.SecondBreakfast => "II Śniadanie",
             MealType.Lunch => "Obiad",
-            MealType.Snack => "Przekąska",
+            MealType.AfternoonSnack => "Podwieczorek",
             MealType.Dinner => "Kolacja",
+            MealType.Snack => "Przekąska",
+            MealType.PreWorkout => "Posiłek przedtreningowy",
+            MealType.PostWorkout => "Posiłek potreningowy",
+            MealType.ExtraMeal => "Dodatkowy posiłek",
+            MealType.Drinks => "Napoje i Koktajle",
             _ => "Posiłek"
         };
 
@@ -594,8 +600,19 @@ Odpowiedz WYŁĄCZNIE poprawnym obiektem JSON w poniższym formacie, bez żadneg
 
     private static List<RecipeTemplate> GetBuiltInTemplates(MealType mealType, string? preference)
     {
+        var targetType = mealType switch
+        {
+            MealType.SecondBreakfast => MealType.Breakfast,
+            MealType.AfternoonSnack => MealType.Snack,
+            MealType.PreWorkout => MealType.Snack,
+            MealType.PostWorkout => MealType.Lunch,
+            MealType.ExtraMeal => MealType.Snack,
+            MealType.Drinks => MealType.Snack,
+            _ => mealType
+        };
+
         var all = GetAllTemplates();
-        var filtered = all.Where(t => t.Type == mealType).ToList();
+        var filtered = all.Where(t => t.Type == targetType).ToList();
 
         if (!string.IsNullOrWhiteSpace(preference))
         {

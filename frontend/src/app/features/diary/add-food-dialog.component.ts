@@ -112,7 +112,7 @@ export interface AddFoodDialogData {
                 </div>
                 <div class="portion-controls">
                   <mat-form-field appearance="outline" class="gram-input">
-                    <mat-label>Ilość (gramy)</mat-label>
+                    <mat-label>{{ isLiquid() ? 'Ilość (ml / g)' : 'Ilość (gramy)' }}</mat-label>
                     <input
                       matInput
                       type="number"
@@ -121,20 +121,28 @@ export interface AddFoodDialogData {
                       [ngModel]="weightGrams()"
                       (ngModelChange)="weightGrams.set(+$event || 0)"
                     />
-                    <span matTextSuffix>g</span>
+                    <span matTextSuffix>{{ isLiquid() ? 'ml' : 'g' }}</span>
                   </mat-form-field>
 
                   <div class="quick-grams">
-                    @for (g of [50, 100, 150, 200, 250]; track g) {
-                      <button type="button" mat-stroked-button (click)="weightGrams.set(g)">
-                        {{ g }}g
-                      </button>
+                    @if (isLiquid()) {
+                      @for (portion of liquidPortions; track portion.value) {
+                        <button type="button" mat-stroked-button (click)="weightGrams.set(portion.value)">
+                          {{ portion.label }}
+                        </button>
+                      }
+                    } @else {
+                      @for (g of [50, 100, 150, 200, 250]; track g) {
+                        <button type="button" mat-stroked-button (click)="weightGrams.set(g)">
+                          {{ g }}g
+                        </button>
+                      }
                     }
                   </div>
                 </div>
 
                 <div class="live-preview">
-                  <span>Wyliczone wartości dla {{ weightGrams() }}g:</span>
+                  <span>Wyliczone wartości dla {{ weightGrams() }}{{ isLiquid() ? ' ml' : ' g' }}:</span>
                   <div class="preview-badges">
                     <span class="macro-badge kcal">{{ previewMacros().kcal }} kcal</span>
                     <span class="macro-badge protein">Białko: {{ previewMacros().protein }}g</span>
@@ -568,6 +576,7 @@ export class AddFoodDialogComponent implements OnInit {
 
   readonly categories = [
     'Wszystkie',
+    'Napoje i Płyny',
     'Tłuszcze i Oleje',
     'Mięso i Ryby',
     'Nabiał i Jaja',
@@ -578,6 +587,17 @@ export class AddFoodDialogComponent implements OnInit {
   ];
 
   readonly customCategories = this.categories.filter((c) => c !== 'Wszystkie');
+
+  readonly liquidPortions = [
+    { label: '150 ml (mała szklanka)', value: 150 },
+    { label: '250 ml (szklanka)', value: 250 },
+    { label: '330 ml (puszka)', value: 330 },
+    { label: '500 ml (butelka)', value: 500 }
+  ];
+
+  isLiquid(): boolean {
+    return this.selectedFood()?.category === 'Napoje i Płyny' || this.data.mealType === MealType.Drinks;
+  }
 
   readonly previewMacros = computed(() => {
     const food = this.selectedFood();
@@ -597,7 +617,7 @@ export class AddFoodDialogComponent implements OnInit {
   readonly customFoodForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     brand: [''],
-    category: ['Nabiał i Jaja', [Validators.required]],
+    category: ['Napoje i Płyny', [Validators.required]],
     caloriesPer100g: [100, [Validators.required, Validators.min(0), Validators.max(1000)]],
     proteinPer100g: [10, [Validators.required, Validators.min(0), Validators.max(100)]],
     carbsPer100g: [10, [Validators.required, Validators.min(0), Validators.max(100)]],
@@ -605,6 +625,10 @@ export class AddFoodDialogComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.data.mealType === MealType.Drinks) {
+      this.selectedCategory.set('Napoje i Płyny');
+      this.weightGrams.set(250);
+    }
     this.loadFoods();
     this.loadMealSets();
   }

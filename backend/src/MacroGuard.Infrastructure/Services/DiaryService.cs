@@ -9,12 +9,26 @@ namespace MacroGuard.Infrastructure.Services;
 
 public class DiaryService(MacroGuardDbContext dbContext, IProfileService profileService) : IDiaryService
 {
-    private static readonly (MealType Type, string Label)[] FourMealTypes =
+    private static readonly (MealType Type, string Label)[] AllMealDefinitions =
     [
         (MealType.Breakfast, "Śniadanie"),
+        (MealType.SecondBreakfast, "II Śniadanie"),
         (MealType.Lunch, "Obiad"),
+        (MealType.AfternoonSnack, "Podwieczorek"),
+        (MealType.Dinner, "Kolacja"),
         (MealType.Snack, "Przekąska"),
-        (MealType.Dinner, "Kolacja")
+        (MealType.PreWorkout, "Posiłek przedtreningowy"),
+        (MealType.PostWorkout, "Posiłek potreningowy"),
+        (MealType.ExtraMeal, "Dodatkowy posiłek"),
+        (MealType.Drinks, "Napoje i Płyny")
+    ];
+
+    private static readonly HashSet<MealType> CoreMealTypes =
+    [
+        MealType.Breakfast,
+        MealType.Lunch,
+        MealType.Snack,
+        MealType.Dinner
     ];
 
     public async Task<DailyDiaryDto> GetDailyDiaryAsync(Guid userId, DateOnly date, CancellationToken ct = default)
@@ -28,9 +42,13 @@ public class DiaryService(MacroGuardDbContext dbContext, IProfileService profile
             .OrderBy(e => e.CreatedAtUtc)
             .ToListAsync(ct);
 
+        var activeMealTypes = AllMealDefinitions
+            .Where(m => CoreMealTypes.Contains(m.Type) || entries.Any(e => e.MealType == m.Type))
+            .ToList();
+
         var mealGroups = new List<MealGroupDto>();
 
-        foreach (var (mealType, label) in FourMealTypes)
+        foreach (var (mealType, label) in activeMealTypes)
         {
             var groupEntries = entries
                 .Where(e => e.MealType == mealType)

@@ -335,16 +335,337 @@ import { MatTabsModule } from '@angular/material/tabs';
             </div>
           </mat-tab>
 
-          <!-- ZAKŁADKA 4: MITY I NAJCZĘSTSZE BŁĘDY (FAQ) -->
+          <!-- ZAKŁADKA 4: TRENING SIŁOWY & BUDOWA MIĘŚNI -->
           <mat-tab>
             <ng-template mat-tab-label>
-              <mat-icon class="tab-icon">psychology_alt</mat-icon>
-              4. Mity i FAQ
+              <mat-icon class="tab-icon">fitness_center</mat-icon>
+              4. Trening Siłowy & Mięśnie
             </ng-template>
 
             <div class="tab-body">
               <div class="article-intro">
-                <h2>Najczęstsze mity i pułapki dietetyczne</h2>
+                <h2>Trening Siłowy — Klucz do Sylwetki, Jędrności i Zdrowia</h2>
+                <p>
+                  Sama dieta ustala Twoją wagę na wadze, ale to <strong>trening siłowy decyduje o tym, jak wyglądasz w lustrze</strong>. 
+                  Niezależnie od tego, czy Twoim celem jest potężna masa mięśniowa, czy zgubienie brzucha i wymodelowanie ciała — ciężary są Twoim największym sojusznikiem.
+                </p>
+              </div>
+
+              <!-- DWA SCENARIUSZE: MASA VS REDUKCJA -->
+              <div class="strength-scenarios-grid">
+                <div class="strength-card bulk-scenario">
+                  <div class="s-header">
+                    <mat-icon>trending_up</mat-icon>
+                    <h3>Na Masie (Nadwyżka Kaloryczna)</h3>
+                  </div>
+                  <p class="s-main-point"><strong>Budujesz mięśnie, a nie tylko tkankę tłuszczową!</strong></p>
+                  <p>
+                    Jeśli jesz więcej kalorii niż wynosi Twoje zapotrzebowanie, organizm musi coś zrobić z tą nadwyżką.
+                    Bez intensywnego bodźca siłowego ciało odłoży <strong>większość nadwyżki jako tłuszcz zapasowy</strong> na brzuchu i biodrach.
+                  </p>
+                  <p>
+                    Gdy trenujesz siłowo, dajesz mięśniom jasny sygnał: <em>„Musimy się wzmocnić i urosnąć, by poradzić sobie z tym obciążeniem!”</em>. Wtedy nadwyżka kalorii i białka wędruje bezpośrednio na rozbudowę włókien mięśniowych (hipertrofię).
+                  </p>
+                </div>
+
+                <div class="strength-card cut-scenario">
+                  <div class="s-header">
+                    <mat-icon>shield</mat-icon>
+                    <h3>Na Redukcji (Deficyt Kaloryczny)</h3>
+                  </div>
+                  <p class="s-main-point"><strong>Chroni przed efektem „skinny-fat” i spowolnieniem metabolizmu</strong></p>
+                  <p>
+                    W deficycie kalorycznym organizm szuka energii. Jeśli nie dajesz mięśniom bodźca do pracy, ciało chętnie pozbędzie się tkanki mięśniowej, bo jej utrzymanie kosztuje je mnóstwo energii każdego dnia!
+                  </p>
+                  <p>
+                    Efekt odchudzania wyłącznie dietą i kardio to często tzw. <em>skinny-fat</em>: waga spada, ale ciało jest wiotkie. Trening siłowy zmusza organizm do ochrony mięśni i czerpania niemal całości energii z tkanki tłuszczowej.
+                  </p>
+                </div>
+              </div>
+
+              <!-- TRZY FILARY SUKCESU -->
+              <h3 class="section-subtitle">Trzy Filary Skutecznego Treningu i Budowy Mięśni</h3>
+              <div class="pillars-grid">
+                <div class="pillar-box">
+                  <div class="pillar-icon">
+                    <mat-icon>fitness_center</mat-icon>
+                  </div>
+                  <h4>1. Progresywne Przeładowanie (Progressive Overload)</h4>
+                  <p>
+                    Mięśnie rosną tylko wtedy, gdy regularnie stawiasz im nowe wyzwania. Z tygodnia na tydzień dąż do:
+                  </p>
+                  <ul>
+                    <li>Dodania minimalnego ciężaru (np. +1–2.5 kg na sztangę lub hantle)</li>
+                    <li>Wykonania 1 powtórzenia więcej w serii z tym samym ciężarem</li>
+                    <li>Poprawy techniki, kontroli i pełnego zakresu ruchu</li>
+                  </ul>
+                </div>
+
+                <div class="pillar-box">
+                  <div class="pillar-icon protein-icon">
+                    <mat-icon>restaurant</mat-icon>
+                  </div>
+                  <h4>2. Białko jako Materiał Budulcowy (1.8 – 2.2 g/kg)</h4>
+                  <p>
+                    Trening daje sygnał i mikrouszkodzenia, ale do rozrostu potrzebne są cegiełki aminokwasów:
+                  </p>
+                  <ul>
+                    <li>Celuj w <strong>1.8–2.2g białka na kg masy ciała</strong> każdego dnia</li>
+                    <li>Podziel białko na 3–4 równe porcje (po 25–40g w posiłku)</li>
+                    <li>Wybieraj: drób, ryby, jaja, skyr, twaróg, strączki lub odżywkę WPC</li>
+                  </ul>
+                </div>
+
+                <div class="pillar-box">
+                  <div class="pillar-icon sleep-icon">
+                    <mat-icon>bedtime</mat-icon>
+                  </div>
+                  <h4>3. Sen i Regeneracja (7–8h na dobę)</h4>
+                  <p>
+                    Pamiętaj: <strong>mięśnie nie rosną na sali treningowej, lecz w łóżku podczas regeneracji!</strong>
+                  </p>
+                  <ul>
+                    <li>W głębokim śnie organizm wydziela najwięcej hormonu wzrostu (GH)</li>
+                    <li>Niedosypianie podnosi kortyzol (stres) i hamuje regenerację tkanek</li>
+                    <li>Nie trenuj tej samej partii dzień po dniu — daj jej 48h na pełną odbudowę</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- PROSTY PLAN DLA POCZĄTKUJĄCYCH (FBW) -->
+              <div class="routine-box">
+                <div class="routine-header">
+                  <mat-icon>checklist</mat-icon>
+                  <div>
+                    <h4>Jak zacząć? Złoty Standard: Trening FBW (Full Body Workout)</h4>
+                    <span>Wystarczą 3 dni w tygodniu po 45–60 minut (np. Poniedziałek / Środa / Piątek)</span>
+                  </div>
+                </div>
+                <div class="routine-content">
+                  <p>
+                    Skup się na ćwiczeniach <strong>wielostawowych</strong>, które angażują najwięcej grup mięśniowych jednocześnie i przynoszą najszybsze efekty sylwetkowe:
+                  </p>
+                  <div class="routine-tags">
+                    <span class="tag">🏋️ Przysiady (Nogi & Pośladki)</span>
+                    <span class="tag">💀 Martwy ciąg (Tył uda, Plecy, Pośladki)</span>
+                    <span class="tag">💪 Wyciskanie leżąc (Klatka, Barki, Triceps)</span>
+                    <span class="tag">🚣 Wiosłowanie hantlem/sztangą (Plecy, Biceps)</span>
+                    <span class="tag">⬆️ Wyciskanie żołnierskie (Barki)</span>
+                    <span class="tag">🪜 Podciąganie na drążku / ściąganie wyciągu</span>
+                  </div>
+                  <p class="routine-note">
+                    <em>Wskazówka: Nie bój się ciężarów! Jeśli dopiero zaczynasz, trenuj pierwsze 2–3 tygodnie z mniejszym obciążeniem, opanowując nienaganną technikę ruchu.</em>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- ZAKŁADKA 5: POPULARNE PUŁAPKI — NA CO UWAŻAĆ? -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">warning_amber</mat-icon>
+              5. Pułapki Dietetyczne
+            </ng-template>
+
+            <div class="tab-body">
+              <div class="article-intro">
+                <h2>Popularne Pułapki Dietetyczne — Na co uważać? ⚠️</h2>
+                <p>
+                  Często wydaje nam się, że „jemy zdrowo”, a waga stoi w miejscu. 
+                  Oto 5 najczęstszych, cichych pułapek, które bezwiednie niszczą deficyt kaloryczny i hamują Twoje postępy:
+                </p>
+              </div>
+
+              <div class="traps-grid">
+                <!-- PUŁAPKA 1: PŁYNNE KALORIE -->
+                <div class="trap-card">
+                  <div class="trap-card-header trap-liquid">
+                    <div class="trap-icon-badge">
+                      <mat-icon>local_drink</mat-icon>
+                    </div>
+                    <div>
+                      <span class="trap-tag">Pułapka 1</span>
+                      <h3>Płynne kalorie i słodzone napoje</h3>
+                    </div>
+                  </div>
+                  <div class="trap-card-body">
+                    <p class="trap-lead">
+                      Twój mózg nie rejestruje płynów tak samo jak stałego pokarmu. Płyn nie rozciąga ścian żołądka na dłużej i nie wyzwala hormonów sytości (leptyny). Możesz wypić 500 kcal w 2 minuty i za chwilę być tak samo głodnym!
+                    </p>
+                    <ul class="trap-points">
+                      <li>
+                        <strong>Zwykła Coca-Cola / Pepsi:</strong> 100 ml to aż <strong>10.6g czystego cukru (42 kcal)</strong>. Puszka 330ml to <strong>35g cukru (7 łyżeczek!) i 140 kcal</strong>, a butelka 500ml to aż <strong>210 kcal</strong>!
+                      </li>
+                      <li>
+                        <strong>Soki owocowe 100%:</strong> Mają witaminy, ale pod względem cukru i kalorii są niemal identyczne jak cola (~45 kcal i 10g cukru w 100ml) i pozbawione są sycącego miąższu oraz błonnika.
+                      </li>
+                      <li>
+                        <strong>Kawy smakowe z mlekiem i syropem:</strong> Duże karmelowe latte potrafi dostarczyć nawet 350–500 kcal — tyle co pełny, sycący obiad.
+                      </li>
+                      <li>
+                        <strong>Alkohol (piwo, kolorowe drinki):</strong> 1g czystego alkoholu to aż 7 kcal (prawie tyle co tłuszcz!). 2 piwa wieczorem to ponad 450–500 pustych kalorii.
+                      </li>
+                    </ul>
+                    <div class="trap-solution">
+                      <mat-icon>lightbulb</mat-icon>
+                      <div>
+                        <strong>Sprytne rozwiązanie:</strong>
+                        <span>Pij wodę, herbaty bez cukru oraz <strong>napoje ZERO (Coca-Cola Zero, Pepsi Max itp. - 0 kcal)</strong>. Mają bezpieczne, przebadane słodziki, dają 100% smaku bez ani jednej kalorii i ratują redukcję!</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PUŁAPKA 2: OLIWA I TŁUSZCZ NA OKO -->
+                <div class="trap-card">
+                  <div class="trap-card-header trap-oil">
+                    <div class="trap-icon-badge">
+                      <mat-icon>opacity</mat-icon>
+                    </div>
+                    <div>
+                      <span class="trap-tag">Pułapka 2</span>
+                      <h3>Olej i oliwa wlewane na patelnię „na oko”</h3>
+                    </div>
+                  </div>
+                  <div class="trap-card-body">
+                    <p class="trap-lead">
+                      Tłuszcz to najbardziej skondensowane źródło energii na Ziemi (1g = aż 9 kcal!). Płaska łyżka oliwy to 10g tłuszczu, czyli ~90–100 kcal.
+                    </p>
+                    <ul class="trap-points">
+                      <li>
+                        „Chlust” oliwy z butelki prosto na rozgrzaną patelnię lub do miski z sałatką to zazwyczaj <strong>3 do 4 łyżek</strong>, czyli <strong>300–400 niepoliczonych kalorii</strong>!
+                      </li>
+                      <li>
+                        Możesz przygotować chudą pierś z kurczaka z warzywami, ale smażąc ją na nieskontrolowanej ilości oleju, podwajasz kaloryczność całego obiadu.
+                      </li>
+                    </ul>
+                    <div class="trap-solution">
+                      <mat-icon>lightbulb</mat-icon>
+                      <div>
+                        <strong>Sprytne rozwiązanie:</strong>
+                        <span>Stawiaj butelkę na wadze przed i po polaniu lub używaj łyżki stołowej jako miarki. Świetnie sprawdza się też oliwa w sprayu (1 psiknięcie to zaledwie ~2–5 kcal).</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PUŁAPKA 3: ZDROWE PRZEKĄSKI (ORZECHY, MASŁO ORZECHOWE) -->
+                <div class="trap-card">
+                  <div class="trap-card-header trap-nuts">
+                    <div class="trap-icon-badge">
+                      <mat-icon>cookie</mat-icon>
+                    </div>
+                    <div>
+                      <span class="trap-tag">Pułapka 3</span>
+                      <h3>Zdrowe przekąski o ogromnej gęstości (orzechy, masło orzechowe)</h3>
+                    </div>
+                  </div>
+                  <div class="trap-card-body">
+                    <p class="trap-lead">
+                      To, że dany produkt jest naturalny, nieprzetworzony i zdrowy, nie oznacza, że nie ma kalorii!
+                    </p>
+                    <ul class="trap-points">
+                      <li>
+                        <strong>Orzechy (włoskie, nerkowce, migdały):</strong> Mają zbawienne kwasy tłuszczowe i minerały, ale 100g to aż <strong>600–650 kcal</strong>. Niewielka garść jedzona przy pracy to błyskawicznie 350 kcal.
+                      </li>
+                      <li>
+                        <strong>Masło orzechowe:</strong> Jedna czubata łyżka stołowa ze słoika to często 30–35g, czyli <strong>ponad 200 kcal</strong>! Dwie takie łyżki to niemal 1/4 dziennego limitu.
+                      </li>
+                      <li>
+                        <strong>Suszone owoce (rodzynki, daktyle, żurawina):</strong> Pozbawione wody są skondensowaną dawką cukru i kalorii — 100g rodzynek to niemal 300 kcal.
+                      </li>
+                    </ul>
+                    <div class="trap-solution">
+                      <mat-icon>lightbulb</mat-icon>
+                      <div>
+                        <strong>Sprytne rozwiązanie:</strong>
+                        <span>Nigdy nie jedz orzechów prosto z torebki ani masła orzechowego ze słoika. Zawsze odważ porcję 20–25g na wadze kuchennej i schowaj paczkę do szafki.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PUŁAPKA 4: SOSY, DRESSINGI I MAJONEZ -->
+                <div class="trap-card">
+                  <div class="trap-card-header trap-sauces">
+                    <div class="trap-icon-badge">
+                      <mat-icon>lunch_dining</mat-icon>
+                    </div>
+                    <div>
+                      <span class="trap-tag">Pułapka 4</span>
+                      <h3>Gotowe sosy, tradycyjny majonez i dressingi</h3>
+                    </div>
+                  </div>
+                  <div class="trap-card-body">
+                    <p class="trap-lead">
+                      Przygotowujesz lekką, dietetyczną sałatkę ze świeżych warzyw (~150 kcal), a potem polewasz ją sosem...
+                    </p>
+                    <ul class="trap-points">
+                      <li>
+                        <strong>Tradycyjny majonez:</strong> 1 czubata łyżka to ~160 kcal i prawie 18g tłuszczu. Dodanie 2 łyżek do sałatki dokłada <strong>ponad 300 kcal</strong>!
+                      </li>
+                      <li>
+                        <strong>Gotowe sosy sałatkowe (np. Cezar, Tysiąca Wysp, czosnkowy):</strong> Większość gotowych sosów w butelkach bazuje na tanim oleju i syropie cukrowym.
+                      </li>
+                    </ul>
+                    <div class="trap-solution">
+                      <mat-icon>lightbulb</mat-icon>
+                      <div>
+                        <strong>Sprytne rozwiązanie:</strong>
+                        <span>Przygotuj sos samemu na bazie jogurtu greckiego lub skyru z czosnkiem, cytryną i ziołami (10x mniej kalorii, mnóstwo białka!) albo wybieraj majonez w wersji Light.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- PUŁAPKA 5: BEZWIEDNE PODJADANIE -->
+                <div class="trap-card">
+                  <div class="trap-card-header trap-grazing">
+                    <div class="trap-icon-badge">
+                      <mat-icon>restaurant</mat-icon>
+                    </div>
+                    <div>
+                      <span class="trap-tag">Pułapka 5</span>
+                      <h3>Bezwiedne podjadanie: „Tylko jeden gryz”</h3>
+                    </div>
+                  </div>
+                  <div class="trap-card-body">
+                    <p class="trap-lead">
+                      „To się nie liczy, bo to tylko kęs” — to najczęstsze podświadome oszustwo, przez które waga nie spada.
+                    </p>
+                    <ul class="trap-points">
+                      <li>Spróbowanie sosu podczas gotowania na obiad (~30 kcal)</li>
+                      <li>Dokończenie kawałka tosta czy naleśnika po dziecku (~80 kcal)</li>
+                      <li>Jeden cukierek lub mała czekoladka od kolegi w pracy (~70 kcal)</li>
+                      <li>Kilka chipsów z paczki partnera na kanapie (~90 kcal)</li>
+                    </ul>
+                    <p class="trap-summary-calc">
+                      W ciągu dnia z takich „niewidzialnych kęsów” uzbiera się <strong>300–500 kcal</strong> — dokładnie tyle, ile wynosi Twój zaplanowany deficyt!
+                    </p>
+                    <div class="trap-solution">
+                      <mat-icon>lightbulb</mat-icon>
+                      <div>
+                        <strong>Złota zasada MacroGuard:</strong>
+                        <span><em>„Jeśli ląduje w ustach, ląduje też w Dzienniku”</em>. Świadomość każdego kęsa to 90% trwałego sukcesu sylwetkowego.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- ZAKŁADKA 6: MITY I NAJCZĘSTSZE BŁĘDY (FAQ) -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <mat-icon class="tab-icon">psychology_alt</mat-icon>
+              6. Mity i FAQ
+            </ng-template>
+
+            <div class="tab-body">
+              <div class="article-intro">
+                <h2>Najczęstsze mity i pytania (FAQ)</h2>
                 <p>Kliknij na pytanie, aby poznać naukową i zdroworozsądkową odpowiedź:</p>
               </div>
 
@@ -438,6 +759,26 @@ import { MatTabsModule } from '@angular/material/tabs';
                     </p>
                     <p class="tip-p">
                       <em>Najlepsza kombinacja: Lekki deficyt kaloryczny + codzienne spacery (8–10 tys. kroków) + 2-3 treningi siłowe w tygodniu.</em>
+                    </p>
+                  </div>
+                </mat-expansion-panel>
+
+                <mat-expansion-panel>
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <mat-icon color="warn">close</mat-icon>
+                      <strong>Mit 6: „Przecież to tylko napój — cola, sok czy piwo nie mają wpływu na moją wagę”</strong>
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div class="faq-content">
+                    <p>
+                      <strong>Fakt:</strong> Płynne kalorie to najczęstsza ukryta przyczyna braku efektów w odchudzaniu! Organizm trawi płynny cukier natychmiast, wyrzucając do krwi gwałtowny skok glukozy i insuliny, bez wywołania uczucia nasycenia.
+                    </p>
+                    <p>
+                      Dwie puszki zwykłej coli lub dwa kartoniki soku w ciągu dnia to dodatkowe <strong>~300 kcal</strong>. W skali miesiąca daje to prawie <strong>10 000 kcal, czyli ponad 1 kilogram czystego tłuszczu</strong>, wypitego zupełnie bezwiednie!
+                    </p>
+                    <p class="tip-p">
+                      <em>Wskazówka: Zawsze sprawdzaj etykietę tego, co pijesz. Jeśli chcesz czegoś ze smakiem, sięgaj po napoje ZERO (0 kcal) lub herbatę i kawę bez cukru.</em>
                     </p>
                   </div>
                 </mat-expansion-panel>
@@ -763,6 +1104,40 @@ import { MatTabsModule } from '@angular/material/tabs';
         color: #92400e;
         mat-icon { color: #d97706; }
       }
+
+      &.liquid-calories-callout {
+        background: #f0fdfa;
+        border: 1px solid #99f6e4;
+        color: #0f766e;
+        margin: 18px 0 20px;
+
+        mat-icon {
+          color: #0d9488;
+        }
+
+        strong {
+          color: #115e59;
+          font-size: 15px;
+        }
+
+        .liquid-facts-list {
+          margin: 8px 0 0;
+          padding-left: 18px;
+
+          li {
+            font-size: 13px;
+            color: #134e4a;
+            margin-bottom: 5px;
+            line-height: 1.45;
+
+            strong {
+              display: inline;
+              color: #0f766e;
+              font-size: 13px;
+            }
+          }
+        }
+      }
     }
 
     .macro-deep-card {
@@ -925,6 +1300,374 @@ import { MatTabsModule } from '@angular/material/tabs';
           .tip-p {
             color: #4f46e5;
             font-size: 13px;
+          }
+        }
+      }
+    }
+
+    .strength-scenarios-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+
+      .strength-card {
+        border-radius: 14px;
+        padding: 18px;
+        border: 1px solid #e2e8f0;
+
+        .s-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 8px;
+
+          mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+          }
+
+          h3 {
+            margin: 0;
+            font-size: 16.5px;
+            font-weight: 700;
+          }
+        }
+
+        .s-main-point {
+          font-size: 14px;
+          margin: 0 0 8px;
+        }
+
+        p {
+          margin: 0 0 10px;
+          font-size: 13.5px;
+          line-height: 1.45;
+          color: #334155;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+
+        &.bulk-scenario {
+          background: #fff7ed;
+          border-color: #fed7aa;
+          .s-header mat-icon { color: #ea580c; }
+          .s-header h3 { color: #9a3412; }
+          .s-main-point { color: #c2410c; }
+        }
+
+        &.cut-scenario {
+          background: #f0fdf4;
+          border-color: #bbf7d0;
+          .s-header mat-icon { color: #16a34a; }
+          .s-header h3 { color: #166534; }
+          .s-main-point { color: #15803d; }
+        }
+      }
+    }
+
+    .section-subtitle {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 20px 0 14px;
+    }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+
+      @media (max-width: 860px) {
+        grid-template-columns: 1fr;
+      }
+
+      .pillar-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px;
+
+        .pillar-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          background: #eef2ff;
+          color: #4f46e5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 12px;
+
+          &.protein-icon { background: #dcfce7; color: #16a34a; }
+          &.sleep-icon { background: #f3e8ff; color: #9333ea; }
+        }
+
+        h4 {
+          margin: 0 0 8px;
+          font-size: 15px;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1.35;
+        }
+
+        p {
+          margin: 0 0 10px;
+          font-size: 13.5px;
+          color: #475569;
+          line-height: 1.45;
+        }
+
+        ul {
+          margin: 0;
+          padding-left: 18px;
+
+          li {
+            font-size: 13px;
+            color: #334155;
+            margin-bottom: 6px;
+            line-height: 1.4;
+          }
+        }
+      }
+    }
+
+    .routine-box {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+
+      .routine-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 14px;
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+          color: #4f46e5;
+        }
+
+        h4 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        span {
+          font-size: 13px;
+          color: #64748b;
+        }
+      }
+
+      .routine-content {
+        p {
+          margin: 0 0 12px;
+          font-size: 14px;
+          color: #334155;
+          line-height: 1.45;
+        }
+
+        .routine-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 14px;
+
+          .tag {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #1e293b;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+          }
+        }
+
+        .routine-note {
+          margin: 0;
+          font-size: 13px;
+          color: #4f46e5;
+        }
+      }
+    }
+
+    /* PUŁAPKI DIETETYCZNE */
+    .traps-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 20px;
+
+      .trap-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+        &:hover {
+          box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .trap-card-header {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 16px 20px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+          .trap-icon-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+
+            mat-icon {
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+            }
+          }
+
+          .trap-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 3px;
+          }
+
+          h3 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.3;
+          }
+
+          &.trap-liquid {
+            background: linear-gradient(135deg, #f0fdfa, #f8fafc);
+            .trap-icon-badge { background: #ccfbf1; color: #0d9488; }
+            .trap-tag { background: #99f6e4; color: #115e59; }
+            h3 { color: #0f766e; }
+          }
+
+          &.trap-oil {
+            background: linear-gradient(135deg, #fffbeb, #f8fafc);
+            .trap-icon-badge { background: #fef3c7; color: #d97706; }
+            .trap-tag { background: #fde68a; color: #92400e; }
+            h3 { color: #b45309; }
+          }
+
+          &.trap-nuts {
+            background: linear-gradient(135deg, #fff7ed, #f8fafc);
+            .trap-icon-badge { background: #ffedd5; color: #ea580c; }
+            .trap-tag { background: #fed7aa; color: #9a3412; }
+            h3 { color: #c2410c; }
+          }
+
+          &.trap-sauces {
+            background: linear-gradient(135deg, #fef2f2, #f8fafc);
+            .trap-icon-badge { background: #fee2e2; color: #e11d48; }
+            .trap-tag { background: #fecdd3; color: #9f1239; }
+            h3 { color: #be123c; }
+          }
+
+          &.trap-grazing {
+            background: linear-gradient(135deg, #f5f3ff, #f8fafc);
+            .trap-icon-badge { background: #ede9fe; color: #7c3aed; }
+            .trap-tag { background: #ddd6fe; color: #5b21b6; }
+            h3 { color: #6d28d9; }
+          }
+        }
+
+        .trap-card-body {
+          padding: 18px 20px;
+
+          .trap-lead {
+            font-size: 14.5px;
+            color: #334155;
+            line-height: 1.5;
+            margin: 0 0 14px;
+          }
+
+          .trap-points {
+            margin: 0 0 16px;
+            padding-left: 20px;
+
+            li {
+              font-size: 13.5px;
+              color: #475569;
+              margin-bottom: 8px;
+              line-height: 1.45;
+
+              strong {
+                color: #0f172a;
+              }
+            }
+          }
+
+          .trap-summary-calc {
+            font-size: 14px;
+            color: #b91c1c;
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 8px 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 0 0 16px;
+          }
+
+          .trap-solution {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 12px 16px;
+
+            mat-icon {
+              color: #16a34a;
+              font-size: 22px;
+              width: 22px;
+              height: 22px;
+              flex-shrink: 0;
+              margin-top: 1px;
+            }
+
+            strong {
+              display: block;
+              color: #166534;
+              font-size: 13.5px;
+              margin-bottom: 2px;
+            }
+
+            span {
+              font-size: 13px;
+              color: #14532d;
+              line-height: 1.45;
+            }
           }
         }
       }

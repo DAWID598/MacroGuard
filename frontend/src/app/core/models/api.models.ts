@@ -7,6 +7,7 @@ export enum ActivityLevel {
   Sedentary = 0,
   LightlyActive = 1,
   ModeratelyActive = 2,
+  PhysicalWork = 5,
   VeryActive = 3,
   ExtraActive = 4
 }
@@ -18,11 +19,18 @@ export enum DietGoal {
 }
 
 export enum MealType {
-  Breakfast = 0, // Śniadanie
-  Lunch = 1,     // Obiad
-  Snack = 2,     // Przekąska
-  Dinner = 3     // Kolacja
+  Breakfast = 0,       // Śniadanie
+  Lunch = 1,           // Obiad
+  Snack = 2,           // Przekąska
+  Dinner = 3,          // Kolacja
+  SecondBreakfast = 4, // II Śniadanie
+  AfternoonSnack = 5,  // Podwieczorek
+  PreWorkout = 6,      // Posiłek przedtreningowy
+  PostWorkout = 7,     // Posiłek potreningowy
+  ExtraMeal = 8,       // Dodatkowy posiłek
+  Drinks = 9           // Napoje i Płyny
 }
+
 
 export interface AuthResponse {
   token: string;
