@@ -46,3 +46,20 @@ public record AddMealEntryRequest(
     [Range(1, 5000)] decimal WeightGrams
 );
 
+public record CopyMealRequest(
+    DateOnly SourceDate,
+    MealType SourceMealType,
+    DateOnly TargetDate,
+    MealType TargetMealType
+);
+
+public record CopyDayRequest(
+    DateOnly SourceDate,
+    DateOnly TargetDate
+);
+
+public record CopyResultDto(
+    int CopiedEntriesCount,
+    string Message
+);
+

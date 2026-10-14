@@ -3,10 +3,17 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AddMealEntryRequest,
+  AiCoachReportDto,
   AiInfoDto,
+  ApplyMealSetRequest,
   ApplyRecipeRequest,
   CalculateProfileRequest,
+  CopyDayRequest,
+  CopyMealRequest,
+  CopyResultDto,
   CreateFoodItemRequest,
+  CreateMealSetFromMealRequest,
+  CustomMealSetDto,
   DailyDiaryDto,
   FoodItemDto,
   GenerateRecipeRequest,
@@ -14,6 +21,7 @@ import {
   LogWeightRequest,
   MacroCalculationResult,
   MealEntryDto,
+  PeriodReportDto,
   UserProfileDto,
   WeightEntryDto,
   WeightStatsSummaryDto
@@ -99,6 +107,42 @@ export class MacroApiService {
 
   deleteWeightEntry(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/weights/${id}`);
+  }
+
+  // Kopiowanie posiłków i dni
+  copyMeal(request: CopyMealRequest): Observable<CopyResultDto> {
+    return this.http.post<CopyResultDto>(`${this.baseUrl}/diary/copy-meal`, request);
+  }
+
+  copyDay(request: CopyDayRequest): Observable<CopyResultDto> {
+    return this.http.post<CopyResultDto>(`${this.baseUrl}/diary/copy-day`, request);
+  }
+
+  // Własne Zestawy („Moje Dania”)
+  getCustomMealSets(): Observable<CustomMealSetDto[]> {
+    return this.http.get<CustomMealSetDto[]>(`${this.baseUrl}/custom-meal-sets`);
+  }
+
+  createMealSetFromMeal(request: CreateMealSetFromMealRequest): Observable<CustomMealSetDto> {
+    return this.http.post<CustomMealSetDto>(`${this.baseUrl}/custom-meal-sets/from-meal`, request);
+  }
+
+  applyCustomMealSet(id: string, request: ApplyMealSetRequest): Observable<MealEntryDto[]> {
+    return this.http.post<MealEntryDto[]>(`${this.baseUrl}/custom-meal-sets/${id}/apply`, request);
+  }
+
+  deleteCustomMealSet(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/custom-meal-sets/${id}`);
+  }
+
+  // AI Coach
+  getAiCoachReport(days: number = 7): Observable<AiCoachReportDto> {
+    return this.http.post<AiCoachReportDto>(`${this.baseUrl}/coach/analyze`, { days });
+  }
+
+  // Raport Okresowy (Wydruk / PDF)
+  getPeriodReport(days: number = 7): Observable<PeriodReportDto> {
+    return this.http.get<PeriodReportDto>(`${this.baseUrl}/reports/period?days=${days}`);
   }
 }
 

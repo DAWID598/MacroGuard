@@ -14,6 +14,7 @@ import { DailyDiaryDto, MealGroupDto, MealType } from '../../core/models/api.mod
 import { MacroApiService } from '../../core/services/macro-api.service';
 import { AddFoodDialogComponent } from './add-food-dialog.component';
 import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
+import { ReportDialogComponent } from './report-dialog.component';
 
 @Component({
   selector: 'app-diary',
@@ -53,6 +54,11 @@ import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
             <mat-icon>scale</mat-icon>
             Waga & Postępy
           </a>
+
+          <button mat-stroked-button class="report-btn" (click)="openReportDialog()" matTooltip="Wygeneruj raport tygodniowy / miesięczny do PDF lub druku">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Raport PDF
+          </button>
 
           <div class="date-navigator">
             <button mat-icon-button (click)="shiftDate(-1)" matTooltip="Poprzedni dzień">
@@ -176,6 +182,26 @@ import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
                 </div>
 
                 <div class="meal-actions">
+                  @if (meal.entries.length > 0) {
+                    <button
+                      mat-icon-button
+                      class="icon-action-btn"
+                      matTooltip="Zapisz ten posiłek jako stały zestaw (Moje Danie)"
+                      (click)="saveMealAsSet(meal)"
+                    >
+                      <mat-icon>bookmark_add</mat-icon>
+                    </button>
+                  }
+
+                  <button
+                    mat-icon-button
+                    class="icon-action-btn"
+                    matTooltip="Skopiuj ten posiłek z wczoraj"
+                    (click)="copyMealFromYesterday(meal.mealType)"
+                  >
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+
                   <button
                     mat-stroked-button
                     class="ai-meal-btn"
@@ -295,6 +321,35 @@ import { AiRecipeDialogComponent } from './ai-recipe-dialog.component';
 
       mat-icon {
         margin-right: 6px;
+      }
+    }
+
+    .report-btn {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 0 14px;
+      height: 42px;
+
+      mat-icon {
+        color: #ef4444;
+        margin-right: 6px;
+      }
+
+      &:hover {
+        background: #f8fafc !important;
+      }
+    }
+
+
+    .icon-action-btn {
+      color: #64748b;
+
+      &:hover {
+        color: #2563eb;
+        background: #eff6ff;
       }
     }
 
@@ -674,6 +729,58 @@ export class DiaryComponent implements OnInit {
         this.snackBar.open('Wpis został usunięty.', 'OK', { duration: 2000 });
         this.loadDiary();
       }
+    });
+  }
+
+  private getYesterdayString(): string {
+    const d = new Date(this.selectedDate() + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+  }
+
+
+  copyMealFromYesterday(mealType: MealType): void {
+    const yesterday = this.getYesterdayString();
+    this.api.copyMeal({
+      sourceDate: yesterday,
+      sourceMealType: mealType,
+      targetDate: this.selectedDate(),
+      targetMealType: mealType
+    }).subscribe({
+      next: (res) => {
+        this.snackBar.open(res.message, 'OK', { duration: 3000 });
+        this.loadDiary();
+      },
+      error: (err) => {
+        this.snackBar.open(err.error?.message || 'Brak pozycji w tym posiłku wczoraj.', 'Zamknij', { duration: 3000 });
+      }
+    });
+  }
+
+  saveMealAsSet(meal: MealGroupDto): void {
+    const name = prompt(`Wpisz nazwę własnego zestawu dla tego posiłku:`, meal.mealName);
+    if (!name || !name.trim()) return;
+
+    this.api.createMealSetFromMeal({
+      name: name.trim(),
+      description: null,
+      sourceDate: this.selectedDate(),
+      sourceMealType: meal.mealType
+    }).subscribe({
+      next: (set) => {
+        this.snackBar.open(`Zapisano zestaw "${set.name}"! Znajdziesz go w zakładce "Moje Zestawy" podczas dodawania jedzenia.`, 'OK', { duration: 4000 });
+      },
+      error: (err) => {
+        this.snackBar.open(err.error?.message || 'Błąd podczas zapisywania zestawu.', 'Zamknij', { duration: 3000 });
+      }
+    });
+  }
+
+  openReportDialog(): void {
+    this.dialog.open(ReportDialogComponent, {
+      width: '880px',
+      maxWidth: '96vw',
+      maxHeight: '92vh'
     });
   }
 

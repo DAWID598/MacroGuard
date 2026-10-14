@@ -64,6 +64,9 @@ public static class DependencyInjection
         services.AddScoped<IEmailSender, SmtpEmailSender>();
         services.AddScoped<IRecipeService, RecipeService>();
         services.AddScoped<IWeightService, WeightService>();
+        services.AddScoped<ICustomMealSetService, CustomMealSetService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IAiCoachService, AiCoachService>();
 
         return services;
     }

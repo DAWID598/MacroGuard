@@ -27,5 +27,7 @@ public interface IDiaryService
     Task<DailyDiaryDto> GetDailyDiaryAsync(Guid userId, DateOnly date, CancellationToken ct = default);
     Task<MealEntryDto> AddMealEntryAsync(Guid userId, AddMealEntryRequest request, CancellationToken ct = default);
     Task<bool> DeleteMealEntryAsync(Guid userId, Guid entryId, CancellationToken ct = default);
+    Task<CopyResultDto> CopyMealAsync(Guid userId, CopyMealRequest request, CancellationToken ct = default);
+    Task<CopyResultDto> CopyDayAsync(Guid userId, CopyDayRequest request, CancellationToken ct = default);
 }
 

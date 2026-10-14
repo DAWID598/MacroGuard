@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -12,12 +13,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
+  AiCoachReportDto,
   LogWeightRequest,
   WeeklyWeightStatDto,
   WeightEntryDto,
   WeightStatsSummaryDto
 } from '../../core/models/api.models';
 import { MacroApiService } from '../../core/services/macro-api.service';
+import { ReportDialogComponent } from '../diary/report-dialog.component';
 
 interface ChartPoint {
   x: number;
@@ -47,7 +50,8 @@ interface YTick {
     MatChipsModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDialogModule
   ],
   template: `
     <div class="stats-container">
@@ -61,6 +65,13 @@ interface YTick {
           <p class="subtitle">
             Śledź wagę bez obsesji. Wahania z dnia na dzień to głównie woda i sód — patrz na średnie tygodniowe!
           </p>
+        </div>
+
+        <div class="stats-header-actions">
+          <button mat-stroked-button class="report-btn" (click)="openReportDialog()" matTooltip="Raport okresowy i wydruk do PDF">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Raport PDF
+          </button>
         </div>
       </div>
 
@@ -248,6 +259,130 @@ interface YTick {
           </mat-card>
         </div>
       </div>
+
+      <!-- KARTA AI COACH -->
+      <mat-card class="coach-card">
+        <div class="coach-header">
+          <div class="coach-header-left">
+            <div class="coach-avatar">
+              <mat-icon>psychology</mat-icon>
+            </div>
+            <div>
+              <h2 class="coach-title">
+                MacroGuard AI Coach
+                <span class="ai-pill">Inteligentny Asystent</span>
+              </h2>
+              <span class="coach-subtitle">
+                Analiza Twojego bilansu kalorii, spożycia białka i trendu wagi
+              </span>
+            </div>
+          </div>
+
+          <div class="coach-actions">
+            <div class="coach-range-selector">
+              <button 
+                mat-stroked-button 
+                [class.active-range]="coachDays === 7" 
+                (click)="setCoachDays(7)">
+                7 dni
+              </button>
+              <button 
+                mat-stroked-button 
+                [class.active-range]="coachDays === 30" 
+                (click)="setCoachDays(30)">
+                30 dni
+              </button>
+            </div>
+
+            <button 
+              mat-flat-button 
+              class="ask-coach-btn" 
+              [disabled]="isGeneratingCoach" 
+              (click)="generateCoachReport()">
+              @if (isGeneratingCoach) {
+                <mat-spinner diameter="18"></mat-spinner>
+                <span>Analizowanie...</span>
+              } @else {
+                <ng-container>
+                  <mat-icon>auto_awesome</mat-icon>
+                  <span>Zapytaj AI o podsumowanie</span>
+                </ng-container>
+              }
+            </button>
+          </div>
+        </div>
+
+        <mat-card-content class="coach-card-content">
+          @if (coachReport) {
+            <div class="coach-report-box">
+              <div class="rep-headline-row">
+                <h3 class="rep-headline">{{ coachReport.headline }}</h3>
+                <span class="model-badge">
+                  <mat-icon class="model-badge-icon">memory</mat-icon>
+                  {{ coachReport.aiModelUsed }}
+                </span>
+              </div>
+
+              <p class="rep-summary">{{ coachReport.summary }}</p>
+
+              <div class="coach-analysis-grid">
+                <div class="analysis-card">
+                  <div class="card-icon-title">
+                    <mat-icon color="primary">local_fire_department</mat-icon>
+                    <strong>Bilans Kaloryczny</strong>
+                  </div>
+                  <p>{{ coachReport.calorieAnalysis }}</p>
+                  <div class="mini-stat">
+                    Średnio: <strong>{{ coachReport.avgCalories | number:'1.0-0' }} kcal</strong> / cel {{ coachReport.targetCalories }} kcal
+                  </div>
+                </div>
+
+                <div class="analysis-card">
+                  <div class="card-icon-title">
+                    <mat-icon color="accent">fitness_center</mat-icon>
+                    <strong>Makroskładniki & Białko</strong>
+                  </div>
+                  <p>{{ coachReport.macroAnalysis }}</p>
+                  <div class="mini-stat">
+                    Białko: <strong>{{ coachReport.avgProteinGrams | number:'1.0-1' }} g</strong> / cel {{ coachReport.targetProteinGrams }} g
+                  </div>
+                </div>
+
+                <div class="analysis-card">
+                  <div class="card-icon-title">
+                    <mat-icon color="primary">scale</mat-icon>
+                    <strong>Trend Wagi</strong>
+                  </div>
+                  <p>{{ coachReport.weightTrendAnalysis }}</p>
+                  <div class="mini-stat">
+                    Zmiana w okresie: <strong>{{ (coachReport.weightChangeKg ?? 0) > 0 ? '+' : '' }}{{ coachReport.weightChangeKg ? (coachReport.weightChangeKg | number:'1.1-2') + ' kg' : 'brak danych' }}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="recommendations-box">
+                <h4>
+                  <mat-icon>lightbulb</mat-icon>
+                  Konkretne wskazówki trenera:
+                </h4>
+                <ul>
+                  @for (rec of coachReport.recommendations; track rec) {
+                    <li>{{ rec }}</li>
+                  }
+                </ul>
+              </div>
+            </div>
+          } @else if (!isGeneratingCoach) {
+            <div class="coach-placeholder">
+              <mat-icon class="placeholder-icon">tips_and_updates</mat-icon>
+              <div>
+                <strong>Chcesz wiedzieć, czy tempo Twojej redukcji jest optymalne?</strong>
+                <p>Kliknij przycisk „Zapytaj AI o podsumowanie”, a asystent sprawdzi Twój bilans kaloryczny, sytość z białka i zachowanie wagi, generując konkretne wskazówki.</p>
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
 
       <!-- Interaktywny Wykres Liniowy Trendu SVG -->
       <mat-card class="chart-card">
@@ -539,6 +674,305 @@ interface YTick {
         color: #64748b;
         margin: 0;
         font-size: 15px;
+      }
+    }
+
+    .stats-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .report-btn {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 0 14px;
+      height: 40px;
+
+      mat-icon {
+        color: #ef4444;
+        margin-right: 6px;
+      }
+
+      &:hover {
+        background: #f8fafc !important;
+      }
+    }
+
+    /* KARTA AI COACH */
+    .coach-card {
+      border-radius: 16px;
+      border: 1px solid #c7d2fe;
+      background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+      box-shadow: 0 4px 18px rgba(99, 102, 241, 0.08);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .coach-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 22px;
+      border-bottom: 1px solid #e0e7ff;
+      flex-wrap: wrap;
+      gap: 16px;
+
+      .coach-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+
+        .coach-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          mat-icon {
+            font-size: 26px;
+            width: 26px;
+            height: 26px;
+          }
+        }
+
+        .coach-title {
+          font-size: 18px;
+          font-weight: 800;
+          color: #1e1b4b;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .ai-pill {
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            background: #e0e7ff;
+            color: #4338ca;
+            font-weight: 700;
+            text-transform: uppercase;
+          }
+        }
+
+        .coach-subtitle {
+          font-size: 13px;
+          color: #64748b;
+        }
+      }
+
+      .coach-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .coach-range-selector {
+        display: flex;
+        gap: 4px;
+
+        button {
+          font-size: 12px;
+          height: 34px;
+          border-radius: 8px;
+
+          &.active-range {
+            background: #e0e7ff;
+            color: #4338ca;
+            border-color: #a5b4fc;
+            font-weight: 700;
+          }
+        }
+      }
+
+      .ask-coach-btn {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+        color: #ffffff !important;
+        border-radius: 10px;
+        font-weight: 600;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
+    .coach-card-content {
+      padding: 20px 22px;
+    }
+
+    .coach-placeholder {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      background: #eff6ff;
+      border: 1px dashed #bfdbfe;
+      border-radius: 12px;
+      color: #1e3a8a;
+
+      .placeholder-icon {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+        color: #3b82f6;
+        flex-shrink: 0;
+      }
+
+      strong {
+        display: block;
+        font-size: 14.5px;
+        margin-bottom: 2px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 13.5px;
+        color: #1d4ed8;
+      }
+    }
+
+    .coach-report-box {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+
+      .rep-headline-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        .rep-headline {
+          font-size: 18px;
+          font-weight: 800;
+          color: #0f172a;
+          margin: 0;
+        }
+
+        .model-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: #f1f5f9;
+          border: 1px solid #cbd5e1;
+          color: #475569;
+          padding: 3px 9px;
+          border-radius: 12px;
+          font-size: 11.5px;
+          font-weight: 600;
+
+          .model-badge-icon {
+            font-size: 15px;
+            width: 15px;
+            height: 15px;
+          }
+        }
+      }
+
+      .rep-summary {
+        font-size: 14.5px;
+        color: #334155;
+        line-height: 1.6;
+        margin: 0;
+        background: #f8fafc;
+        padding: 14px 16px;
+        border-radius: 10px;
+        border-left: 4px solid #4f46e5;
+      }
+    }
+
+    .coach-analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+
+      .analysis-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 10px;
+
+        .card-icon-title {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 14px;
+          color: #0f172a;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        p {
+          font-size: 13px;
+          color: #475569;
+          line-height: 1.5;
+          margin: 0;
+        }
+
+        .mini-stat {
+          font-size: 12px;
+          color: #64748b;
+          border-top: 1px solid #f1f5f9;
+          padding-top: 8px;
+
+          strong {
+            color: #0f172a;
+          }
+        }
+      }
+    }
+
+    .recommendations-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 16px 20px;
+
+      h4 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #166534;
+        margin: 0 0 10px;
+
+        mat-icon {
+          color: #16a34a;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #166534;
+        font-size: 13.5px;
+        line-height: 1.6;
+
+        li {
+          margin-bottom: 4px;
+        }
       }
     }
 
@@ -994,6 +1428,7 @@ interface YTick {
 export class StatsComponent implements OnInit {
   private readonly api = inject(MacroApiService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   readonly todayString = new Date().toISOString().split('T')[0];
 
@@ -1002,6 +1437,38 @@ export class StatsComponent implements OnInit {
   selectedRangeDays: number = 30; // 14, 30, 90, 0 (wszystko)
   isLoading = true;
   isSaving = false;
+
+  // AI Coach
+  coachReport: AiCoachReportDto | null = null;
+  isGeneratingCoach = false;
+  coachDays: number = 7;
+
+  setCoachDays(days: number): void {
+    this.coachDays = days;
+  }
+
+  generateCoachReport(): void {
+    this.isGeneratingCoach = true;
+    this.api.getAiCoachReport(this.coachDays).subscribe({
+      next: (rep) => {
+        this.coachReport = rep;
+        this.isGeneratingCoach = false;
+        this.snackBar.open('Wygenerowano analizę AI Coach!', 'Świetnie', { duration: 3000 });
+      },
+      error: (err) => {
+        this.isGeneratingCoach = false;
+        this.snackBar.open(err.error?.message || 'Błąd podczas generowania analizy AI Coach.', 'Zamknij', { duration: 3000 });
+      }
+    });
+  }
+
+  openReportDialog(): void {
+    this.dialog.open(ReportDialogComponent, {
+      width: '880px',
+      maxWidth: '96vw',
+      maxHeight: '92vh'
+    });
+  }
 
   // Formularz wprowadzania wagi
   logForm: LogWeightRequest = {

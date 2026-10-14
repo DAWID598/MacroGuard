@@ -43,6 +43,22 @@ public class DiaryController(IDiaryService diaryService) : ControllerBase
         return deleted ? NoContent() : NotFound();
     }
 
+    [HttpPost("copy-meal")]
+    public async Task<ActionResult<CopyResultDto>> CopyMeal([FromBody] CopyMealRequest request, CancellationToken ct)
+    {
+        var userId = GetCurrentUserId();
+        var result = await diaryService.CopyMealAsync(userId, request, ct);
+        return Ok(result);
+    }
+
+    [HttpPost("copy-day")]
+    public async Task<ActionResult<CopyResultDto>> CopyDay([FromBody] CopyDayRequest request, CancellationToken ct)
+    {
+        var userId = GetCurrentUserId();
+        var result = await diaryService.CopyDayAsync(userId, request, ct);
+        return Ok(result);
+    }
+
     private Guid GetCurrentUserId()
     {
         var claim = User.FindFirstValue(ClaimTypes.NameIdentifier)

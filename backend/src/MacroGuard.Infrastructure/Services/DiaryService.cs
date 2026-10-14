@@ -96,6 +96,60 @@ public class DiaryService(MacroGuardDbContext dbContext, IProfileService profile
         return true;
     }
 
+    public async Task<CopyResultDto> CopyMealAsync(Guid userId, CopyMealRequest request, CancellationToken ct = default)
+    {
+        var sourceEntries = await dbContext.MealEntries
+            .Where(e => e.UserId == userId && e.ConsumedDate == request.SourceDate && e.MealType == request.SourceMealType)
+            .ToListAsync(ct);
+
+        if (sourceEntries.Count == 0)
+        {
+            return new CopyResultDto(0, "Brak pozycji do skopiowania w wybranym posiłku źródłowym.");
+        }
+
+        var newEntries = sourceEntries.Select(e => new MealEntry
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            FoodItemId = e.FoodItemId,
+            ConsumedDate = request.TargetDate,
+            MealType = request.TargetMealType,
+            WeightGrams = e.WeightGrams
+        }).ToList();
+
+        await dbContext.MealEntries.AddRangeAsync(newEntries, ct);
+        await dbContext.SaveChangesAsync(ct);
+
+        return new CopyResultDto(newEntries.Count, $"Pomyślnie skopiowano {newEntries.Count} składników!");
+    }
+
+    public async Task<CopyResultDto> CopyDayAsync(Guid userId, CopyDayRequest request, CancellationToken ct = default)
+    {
+        var sourceEntries = await dbContext.MealEntries
+            .Where(e => e.UserId == userId && e.ConsumedDate == request.SourceDate)
+            .ToListAsync(ct);
+
+        if (sourceEntries.Count == 0)
+        {
+            return new CopyResultDto(0, "Brak pozycji w wybranym dniu źródłowym.");
+        }
+
+        var newEntries = sourceEntries.Select(e => new MealEntry
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            FoodItemId = e.FoodItemId,
+            ConsumedDate = request.TargetDate,
+            MealType = e.MealType,
+            WeightGrams = e.WeightGrams
+        }).ToList();
+
+        await dbContext.MealEntries.AddRangeAsync(newEntries, ct);
+        await dbContext.SaveChangesAsync(ct);
+
+        return new CopyResultDto(newEntries.Count, $"Pomyślnie skopiowano cały dzień ({newEntries.Count} składników)!");
+    }
+
     private static MealEntryDto MapEntryToDto(MealEntry e) => new(
         Id: e.Id,
         FoodItemId: e.FoodItemId,

@@ -29,6 +29,24 @@ public static class DatabaseInitializer
                 "CreatedAtUtc" timestamp with time zone NOT NULL
             );
             CREATE UNIQUE INDEX IF NOT EXISTS "IX_WeightEntries_UserId_Date" ON "WeightEntries" ("UserId", "Date");
+
+            CREATE TABLE IF NOT EXISTS "CustomMealSets" (
+                "Id" uuid NOT NULL PRIMARY KEY,
+                "UserId" uuid NOT NULL,
+                "Name" character varying(120) NOT NULL,
+                "Description" character varying(250),
+                "DefaultMealType" integer,
+                "CreatedAtUtc" timestamp with time zone NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS "IX_CustomMealSets_UserId" ON "CustomMealSets" ("UserId");
+
+            CREATE TABLE IF NOT EXISTS "CustomMealSetItems" (
+                "Id" uuid NOT NULL PRIMARY KEY,
+                "CustomMealSetId" uuid NOT NULL REFERENCES "CustomMealSets" ("Id") ON DELETE CASCADE,
+                "FoodItemId" uuid NOT NULL REFERENCES "FoodItems" ("Id") ON DELETE RESTRICT,
+                "WeightGrams" numeric(7,2) NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS "IX_CustomMealSetItems_CustomMealSetId" ON "CustomMealSetItems" ("CustomMealSetId");
         """);
 
         // 1. Bogata baza popularnych produktów spożywczych (w tym tłuszcze i oleje do smażenia)

@@ -232,4 +232,117 @@ export interface WeightStatsSummaryDto {
   recentEntries: WeightEntryDto[];
 }
 
+// Kopiowanie posiłków i dni
+export interface CopyMealRequest {
+  sourceDate: string;
+  sourceMealType: MealType;
+  targetDate: string;
+  targetMealType: MealType;
+}
+
+export interface CopyDayRequest {
+  sourceDate: string;
+  targetDate: string;
+}
+
+export interface CopyResultDto {
+  copiedEntriesCount: number;
+  message: string;
+}
+
+// Własne zestawy („Moje Dania”)
+export interface CustomMealSetItemDto {
+  id: string;
+  foodItemId: string;
+  foodName: string;
+  brand?: string | null;
+  weightGrams: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export interface CustomMealSetDto {
+  id: string;
+  name: string;
+  description?: string | null;
+  defaultMealType?: MealType | null;
+  totalCalories: number;
+  totalProtein: number;
+  totalCarbs: number;
+  totalFat: number;
+  itemsCount: number;
+  items: CustomMealSetItemDto[];
+}
+
+export interface CreateMealSetFromMealRequest {
+  name: string;
+  description?: string | null;
+  sourceDate: string;
+  sourceMealType: MealType;
+}
+
+export interface ApplyMealSetRequest {
+  targetDate: string;
+  targetMealType: MealType;
+}
+
+// AI Coach
+export interface AiCoachRequest {
+  days: number;
+}
+
+export interface AiCoachReportDto {
+  headline: string;
+  summary: string;
+  calorieAnalysis: string;
+  macroAnalysis: string;
+  weightTrendAnalysis: string;
+  recommendations: string[];
+  avgCalories: number;
+  targetCalories: number;
+  avgProteinGrams: number;
+  targetProteinGrams: number;
+  weightChangeKg?: number | null;
+  loggedDaysCount: number;
+  totalDaysInPeriod: number;
+  aiModelUsed: string;
+  generatedAtUtc: string;
+}
+
+// Eksport Raportów
+export interface DailyReportItemDto {
+  date: string;
+  consumedCalories: number;
+  consumedProtein: number;
+  consumedCarbs: number;
+  consumedFat: number;
+  weightKg?: number | null;
+}
+
+export interface PeriodReportDto {
+  userDisplayName: string;
+  goal: DietGoal;
+  targetCalories: number;
+  targetProteinGrams: number;
+  targetCarbsGrams: number;
+  targetFatGrams: number;
+  startDate: string;
+  endDate: string;
+  totalDays: number;
+  loggedDays: number;
+  avgCalories: number;
+  avgProtein: number;
+  avgCarbs: number;
+  avgFat: number;
+  calorieAdherencePercent: number;
+  startWeightKg?: number | null;
+  endWeightKg?: number | null;
+  weightChangeKg?: number | null;
+  dailyRecords: DailyReportItemDto[];
+  generatedAtUtc: string;
+}
+
+
 

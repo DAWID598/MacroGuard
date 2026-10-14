@@ -13,6 +13,8 @@ public class MacroGuardDbContext(DbContextOptions<MacroGuardDbContext> options)
     public DbSet<FoodItem> FoodItems => Set<FoodItem>();
     public DbSet<MealEntry> MealEntries => Set<MealEntry>();
     public DbSet<WeightEntry> WeightEntries => Set<WeightEntry>();
+    public DbSet<CustomMealSet> CustomMealSets => Set<CustomMealSet>();
+    public DbSet<CustomMealSetItem> CustomMealSetItems => Set<CustomMealSetItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -56,6 +58,28 @@ public class MacroGuardDbContext(DbContextOptions<MacroGuardDbContext> options)
             entity.HasIndex(x => new { x.UserId, x.Date }).IsUnique();
             entity.Property(x => x.WeightKg).HasPrecision(5, 2);
             entity.Property(x => x.Note).HasMaxLength(200);
+        });
+
+        builder.Entity<CustomMealSet>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.UserId);
+            entity.Property(x => x.Name).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(250);
+            entity.HasMany(x => x.Items)
+                .WithOne(x => x.CustomMealSet)
+                .HasForeignKey(x => x.CustomMealSetId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<CustomMealSetItem>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.WeightGrams).HasPrecision(7, 2);
+            entity.HasOne(x => x.FoodItem)
+                .WithMany()
+                .HasForeignKey(x => x.FoodItemId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

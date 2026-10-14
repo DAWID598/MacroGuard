@@ -45,6 +45,26 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
 - **Karty metryk KPI:** Ostatnia waga, Całkowity postęp od startu, Średnia w tym tygodniu oraz Tempo zmian tydzień do tygodnia z oceną.
 - **Historia i edycja:** Tabela zarejestrowanych pomiarów z możliwością usuwania wpisów.
 
+### 4. Błyskawiczne Kopiowanie Posiłków („Kopiuj z wczoraj”)
+- **Kopiowanie pojedynczego posiłku:** Przycisk `Kopiuj z wczoraj` przy każdym posiłku (Śniadanie, Obiad, Przekąska, Kolacja) w dzienniku. Za jednym kliknięciem przenosi wszystkie produkty z danego posiłku z dnia poprzedniego — bez konieczności ponownego wyszukiwania i wpisywania gramatur.
+
+### 5. Moje Zestawy Dań („Ulubione Posiłki / Zestawy”)
+- **Tworzenie zestawu z dziennika:** Przycisk `Zapisz jako zestaw` przy dowolnym posiłku z dziennika — wystarczy wpisać własną nazwę (np. *„Moja standardowa owsianka”*, *„Kurczak z ryżem i brokułem”*), a zestaw zostaje trwale zapisany w bazie danych wraz z gramaturami produktów i przeliczonymi makroskładnikami.
+- **Dodawanie zestawu w 1 kliknięcie:** W oknie dodawania posiłku pojawiła się nowa zakładka **„🍱 Moje Zestawy”**. Prezentuje listę utworzonych dań, ich całkowite kalorie i makro, szczegółową listę składników oraz przyciski natychmiastowego wstawienia (`Wstaw ten zestaw`) i usuwania.
+
+### 6. MacroGuard AI Coach (Analiza Postępów & Rekomendacje)
+- **Kompleksowa analiza sylwetkowa:** Dostępna w widoku *Waga & Postępy* z przełącznikiem okresu **Ostatnie 7 dni** vs **Ostatnie 30 dni**.
+- **Weryfikacja bilansu i nawyków:** Porównuje realną średnią kaloryczność ze zdefiniowanym celem TDEE/deficytu/nadwyżki, sprawdza pokrycie zapotrzebowania na białko (g/kg masy ciała) oraz zestawia bilans energetyczny z rzeczywistym ruchem wagi porannej.
+- **Konkretne rekomendacje krok po kroku:** Wskazuje 3-4 precyzyjne zalecenia dietetyczno-treningowe dopasowane do aktualnej fazy (redukcja, masa, rekompozycja, utrzymanie).
+- **Uniwersalność AI i praca offline:** Działa w oparciu o skonfigurowany model LLM (Google Gemini, OpenAI, Claude, Ollama), a w razie braku klucza API przełącza się automatycznie na **inteligentny algorytm kulinarno-dietetyczny offline**.
+
+### 7. Raporty Okresowe & Eksport do PDF
+- **Dostęp z Dziennika i Statystyk:** Przycisk `Raport PDF` dostępny w nagłówku Dziennika oraz w zakładce Waga & Postępy.
+- **Podsumowanie okresu:** Błyskawiczny wybór raportu za **Ostatnie 7 dni** lub **Ostatnie 30 dni**.
+- **Karty wskaźników KPI:** Realizacja celów kalorii, białka, tłuszczów i węglowodanów, średnie dzienne spożycie oraz zmiana wagi.
+- **Szczegółowa tabela dzień po dniu:** Podsumowanie każdego dnia z kolorystycznym wyróżnieniem bilansu i zjedzonych makroskładników.
+- **Gotowy szablon do druku i zapisu PDF:** Układ `@media print` sformatowany pod stronę A4 bez niepotrzebnych pasków przewijania czy elementów UI — przycisk `Drukuj / Zapisz jako PDF` wywołuje systemowy podgląd wydruku.
+
 ---
 
 ## Szybki Start

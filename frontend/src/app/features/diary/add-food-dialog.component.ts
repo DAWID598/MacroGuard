@@ -10,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
-import { FoodItemDto, MealType } from '../../core/models/api.models';
+import { CustomMealSetDto, FoodItemDto, MealType } from '../../core/models/api.models';
 import { MacroApiService } from '../../core/services/macro-api.service';
 
 export interface AddFoodDialogData {
@@ -205,6 +205,64 @@ export interface AddFoodDialogData {
             </button>
           </form>
         </mat-tab>
+
+        <!-- ZAKŁADKA 3: MOJE ZESTAWY -->
+        <mat-tab label="🍱 Moje Zestawy">
+          <div class="tab-pane sets-pane">
+            @if (mealSets().length === 0) {
+              <div class="empty-sets-box">
+                <mat-icon class="empty-icon">bookmark_border</mat-icon>
+                <h3>Brak zapisanych zestawów</h3>
+                <p>
+                  Skomponuj swój ulubiony posiłek w dzienniku i kliknij przycisk
+                  <strong>„Zapisz jako zestaw”</strong> na karcie posiłku, a pojawi się tutaj do wstawiania 1 kliknięciem!
+                </p>
+              </div>
+            } @else {
+              <div class="sets-list">
+                @for (set of mealSets(); track set.id) {
+                  <div class="meal-set-card">
+                    <div class="set-header">
+                      <div>
+                        <strong class="set-name">{{ set.name }}</strong>
+                        @if (set.description) {
+                          <span class="set-desc">{{ set.description }}</span>
+                        }
+                      </div>
+                      <button mat-icon-button color="warn" (click)="deleteMealSet(set, $event)" matTooltip="Usuń ten zestaw">
+                        <mat-icon>delete_outline</mat-icon>
+                      </button>
+                    </div>
+
+                    <div class="set-macros">
+                      <span class="macro-pill kcal">{{ set.totalCalories | number:'1.0-0' }} kcal</span>
+                      <span class="macro-pill protein">B: {{ set.totalProtein | number:'1.0-1' }}g</span>
+                      <span class="macro-pill carbs">W: {{ set.totalCarbs | number:'1.0-1' }}g</span>
+                      <span class="macro-pill fat">T: {{ set.totalFat | number:'1.0-1' }}g</span>
+                    </div>
+
+                    <div class="set-items-preview">
+                      Składniki ({{ set.itemsCount }}):
+                      @for (item of set.items; track item.id; let last = $last) {
+                        <span>{{ item.foodName }} ({{ item.weightGrams }}g){{ last ? '' : ', ' }}</span>
+                      }
+                    </div>
+
+                    <button 
+                      mat-flat-button 
+                      color="primary" 
+                      class="apply-set-btn" 
+                      [disabled]="isSaving()"
+                      (click)="applyMealSet(set)">
+                      <mat-icon>playlist_add_check</mat-icon>
+                      Wstaw ten zestaw do {{ data.mealName }}
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </mat-tab>
       </mat-tab-group>
     </mat-dialog-content>
 
@@ -389,6 +447,106 @@ export interface AddFoodDialogData {
       font-size: 13px;
       color: #475569;
     }
+
+    .sets-pane {
+      padding-top: 14px;
+    }
+
+    .empty-sets-box {
+      text-align: center;
+      padding: 36px 16px;
+      color: #64748b;
+
+      .empty-icon {
+        font-size: 44px;
+        width: 44px;
+        height: 44px;
+        color: #94a3b8;
+        margin-bottom: 8px;
+      }
+
+      h3 {
+        margin: 0 0 6px;
+        color: #1e293b;
+      }
+
+      p {
+        margin: 0 auto;
+        max-width: 420px;
+        font-size: 13.5px;
+        line-height: 1.5;
+      }
+    }
+
+    .sets-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .meal-set-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .set-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        .set-name {
+          font-size: 15px;
+          color: #0f172a;
+          display: block;
+        }
+
+        .set-desc {
+          font-size: 12.5px;
+          color: #64748b;
+        }
+      }
+
+      .set-macros {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+
+        .macro-pill {
+          padding: 3px 8px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 700;
+
+          &.kcal { background: #fef3c7; color: #b45309; }
+          &.protein { background: #e0e7ff; color: #4338ca; }
+          &.carbs { background: #dbeafe; color: #1d4ed8; }
+          &.fat { background: #fae8ff; color: #86198f; }
+        }
+      }
+
+      .set-items-preview {
+        font-size: 12.5px;
+        color: #475569;
+        background: #f8fafc;
+        padding: 8px 10px;
+        border-radius: 8px;
+        line-height: 1.4;
+      }
+
+      .apply-set-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        height: 38px;
+      }
+    }
   `]
 })
 export class AddFoodDialogComponent implements OnInit {
@@ -404,6 +562,7 @@ export class AddFoodDialogComponent implements OnInit {
   readonly selectedCategory = signal<string>('Wszystkie');
   readonly foods = signal<FoodItemDto[]>([]);
   readonly selectedFood = signal<FoodItemDto | null>(null);
+  readonly mealSets = signal<CustomMealSetDto[]>([]);
   readonly weightGrams = signal<number>(100);
   readonly isSaving = signal<boolean>(false);
 
@@ -447,6 +606,49 @@ export class AddFoodDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadFoods();
+    this.loadMealSets();
+  }
+
+  loadMealSets(): void {
+    this.api.getCustomMealSets().subscribe({
+      next: (sets) => {
+        this.mealSets.set(sets);
+      },
+      error: () => {}
+    });
+  }
+
+  applyMealSet(set: CustomMealSetDto): void {
+    this.isSaving.set(true);
+    this.api.applyCustomMealSet(set.id, {
+      targetDate: this.data.date,
+      targetMealType: this.data.mealType
+    }).subscribe({
+      next: (entries) => {
+        this.isSaving.set(false);
+        this.snackBar.open(`Wstawiono zestaw "${set.name}" (${entries.length} składników)!`, 'OK', { duration: 3000 });
+        this.dialogRef.close(entries);
+      },
+      error: () => {
+        this.isSaving.set(false);
+        this.snackBar.open('Błąd podczas wstawiania zestawu do posiłku.', 'Zamknij', { duration: 3000 });
+      }
+    });
+  }
+
+  deleteMealSet(set: CustomMealSetDto, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!confirm(`Czy na pewno chcesz usunąć zestaw "${set.name}"?`)) return;
+
+    this.api.deleteCustomMealSet(set.id).subscribe({
+      next: () => {
+        this.mealSets.update(prev => prev.filter(s => s.id !== set.id));
+        this.snackBar.open(`Usunięto zestaw "${set.name}".`, 'OK', { duration: 2500 });
+      },
+      error: () => {
+        this.snackBar.open('Błąd podczas usuwania zestawu.', 'Zamknij', { duration: 3000 });
+      }
+    });
   }
 
   selectCategory(category: string): void {
