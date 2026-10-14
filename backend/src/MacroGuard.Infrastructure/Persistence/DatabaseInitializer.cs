@@ -47,6 +47,10 @@ public static class DatabaseInitializer
                 "WeightGrams" numeric(7,2) NOT NULL
             );
             CREATE INDEX IF NOT EXISTS "IX_CustomMealSetItems_CustomMealSetId" ON "CustomMealSetItems" ("CustomMealSetId");
+
+            ALTER TABLE "UserProfiles" ADD COLUMN IF NOT EXISTS "TargetWeightKg" numeric(5,2);
+            ALTER TABLE "UserProfiles" ADD COLUMN IF NOT EXISTS "DeficitPercentage" integer;
+            ALTER TABLE "UserProfiles" ADD COLUMN IF NOT EXISTS "WeeklyChangeKg" numeric(4,2);
         """);
 
         // 1. Bogata baza popularnych produktów spożywczych (w tym tłuszcze i oleje do smażenia)

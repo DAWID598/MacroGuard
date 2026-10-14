@@ -16,7 +16,14 @@ public record UserProfileDto(
     int TargetCalories,
     int TargetProteinGrams,
     int TargetCarbsGrams,
-    int TargetFatGrams
+    int TargetFatGrams,
+    decimal? TargetWeightKg = null,
+    int? DeficitPercentage = null,
+    decimal? WeeklyChangeKg = null,
+    decimal? WeightDifferenceKg = null,
+    int? DeficitCalories = null,
+    int? EstimatedWeeks = null,
+    bool IsBelowBmr = false
 );
 
 public record CalculateProfileRequest(
@@ -26,6 +33,9 @@ public record CalculateProfileRequest(
     [Range(100, 250)] decimal HeightCm,
     ActivityLevel ActivityLevel,
     DietGoal Goal,
+    decimal? TargetWeightKg = null,
+    int? DeficitPercentage = null,
+    decimal? WeeklyChangeKg = null,
     int? CustomCalories = null,
     int? CustomProteinGrams = null,
     int? CustomCarbsGrams = null,

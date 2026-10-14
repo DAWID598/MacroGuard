@@ -37,7 +37,10 @@ public class ProfileController(IProfileService profileService) : ControllerBase
             request.WeightKg,
             request.HeightCm,
             request.ActivityLevel,
-            request.Goal
+            request.Goal,
+            request.TargetWeightKg,
+            request.DeficitPercentage,
+            request.WeeklyChangeKg
         );
         return Ok(result);
     }

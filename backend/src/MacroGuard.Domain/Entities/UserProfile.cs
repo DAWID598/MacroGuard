@@ -19,6 +19,11 @@ public class UserProfile
     public int TargetProteinGrams { get; set; } = 150;
     public int TargetCarbsGrams { get; set; } = 325;
     public int TargetFatGrams { get; set; } = 85;
+
+    public decimal? TargetWeightKg { get; set; }
+    public int? DeficitPercentage { get; set; }
+    public decimal? WeeklyChangeKg { get; set; }
+
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
 

@@ -170,7 +170,7 @@ import { ReportDialogComponent } from './report-dialog.component';
                   <div class="meal-icon">
                     <mat-icon>{{ getMealIcon(meal.mealType) }}</mat-icon>
                   </div>
-                  <div>
+                  <div class="meal-text-group">
                     <h3>{{ meal.mealName }}</h3>
                     <div class="meal-sub-macros">
                       <span class="macro-badge kcal">{{ meal.totalCalories | number:'1.0-0' }} kcal</span>
@@ -507,13 +507,15 @@ import { ReportDialogComponent } from './report-dialog.component';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 18px;
+      padding: 14px 18px;
       gap: 12px;
+      flex-wrap: wrap;
 
       .meal-title-group {
         display: flex;
         align-items: center;
         gap: 12px;
+        min-width: 0;
 
         .meal-icon {
           width: 42px;
@@ -524,20 +526,35 @@ import { ReportDialogComponent } from './report-dialog.component';
           display: flex;
           align-items: center;
           justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .meal-text-group {
+          min-width: 0;
         }
 
         h3 {
-          margin: 0 0 4px;
-          font-size: 17px;
+          margin: 0 0 5px;
+          font-size: 16.5px;
           font-weight: 700;
           color: #0f172a;
+          line-height: 1.2;
+        }
+
+        .meal-sub-macros {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 5px 6px;
+          line-height: 1.3;
         }
       }
 
       .meal-actions {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
+        flex-shrink: 0;
       }
 
       .ai-meal-btn {
@@ -592,16 +609,17 @@ import { ReportDialogComponent } from './report-dialog.component';
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: 5px 6px;
+        line-height: 1.3;
 
         .grams-pill {
-          font-size: 12px;
+          font-size: 11.5px;
           font-weight: 600;
           color: #334155;
           background: #e2e8f0;
-          padding: 2px 8px;
-          border-radius: 10px;
-          margin-right: 4px;
+          padding: 2.5px 8px;
+          border-radius: 8px;
+          white-space: nowrap;
         }
       }
     }

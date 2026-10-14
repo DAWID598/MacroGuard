@@ -59,6 +59,13 @@ export interface UserProfileDto {
   targetProteinGrams: number;
   targetCarbsGrams: number;
   targetFatGrams: number;
+  targetWeightKg?: number | null;
+  deficitPercentage?: number | null;
+  weeklyChangeKg?: number | null;
+  weightDifferenceKg?: number | null;
+  deficitCalories?: number | null;
+  estimatedWeeks?: number | null;
+  isBelowBmr?: boolean;
 }
 
 export interface CalculateProfileRequest {
@@ -68,6 +75,9 @@ export interface CalculateProfileRequest {
   heightCm: number;
   activityLevel: ActivityLevel;
   goal: DietGoal;
+  targetWeightKg?: number | null;
+  deficitPercentage?: number | null;
+  weeklyChangeKg?: number | null;
   customCalories?: number | null;
   customProteinGrams?: number | null;
   customCarbsGrams?: number | null;
@@ -81,6 +91,12 @@ export interface MacroCalculationResult {
   targetProteinGrams: number;
   targetCarbsGrams: number;
   targetFatGrams: number;
+  targetWeightKg?: number | null;
+  weightDifferenceKg?: number | null;
+  weeklyChangeKg?: number | null;
+  deficitCalories?: number | null;
+  estimatedWeeks?: number | null;
+  isBelowBmr?: boolean;
 }
 
 export interface FoodItemDto {

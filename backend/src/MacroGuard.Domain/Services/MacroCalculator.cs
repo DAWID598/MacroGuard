@@ -8,7 +8,13 @@ public record MacroCalculationResult(
     int TargetCalories,
     int TargetProteinGrams,
     int TargetCarbsGrams,
-    int TargetFatGrams
+    int TargetFatGrams,
+    decimal? TargetWeightKg = null,
+    decimal? WeightDifferenceKg = null,
+    decimal? WeeklyChangeKg = null,
+    int? DeficitCalories = null,
+    int? EstimatedWeeks = null,
+    bool IsBelowBmr = false
 );
 
 public static class MacroCalculator
@@ -19,7 +25,10 @@ public static class MacroCalculator
         decimal weightKg,
         decimal heightCm,
         ActivityLevel activityLevel,
-        DietGoal goal)
+        DietGoal goal,
+        decimal? targetWeightKg = null,
+        int? deficitPercentage = null,
+        decimal? weeklyChangeKg = null)
     {
         // Wzór Mifflin-St Jeor
         decimal genderOffset = gender == Gender.Male ? 5m : -161m;
@@ -38,15 +47,70 @@ public static class MacroCalculator
 
         int tdee = (int)Math.Round(bmrRaw * palMultiplier);
 
-        decimal goalMultiplier = goal switch
-        {
-            DietGoal.Cut => 0.85m,      // -15% deficyt
-            DietGoal.Maintain => 1.0m,  // 0% zero kaloryczne
-            DietGoal.Bulk => 1.12m,     // +12% nadwyżka
-            _ => 1.0m
-        };
+        int targetCalories;
+        int deficitCalories = 0;
+        decimal effectiveWeeklyLoss = 0m;
 
-        int targetCalories = Math.Max(1200, (int)Math.Round(tdee * goalMultiplier));
+        switch (goal)
+        {
+            case DietGoal.Cut:
+                if (deficitPercentage.HasValue && deficitPercentage.Value > 0)
+                {
+                    int pct = Math.Clamp(deficitPercentage.Value, 5, 40);
+                    targetCalories = (int)Math.Round(tdee * (1.0m - (pct / 100m)));
+                    deficitCalories = tdee - targetCalories;
+                    effectiveWeeklyLoss = Math.Round((decimal)deficitCalories * 7m / 7700m, 2);
+                }
+                else if (weeklyChangeKg.HasValue && weeklyChangeKg.Value > 0)
+                {
+                    decimal loss = Math.Clamp(weeklyChangeKg.Value, 0.1m, 1.5m);
+                    deficitCalories = (int)Math.Round((loss * 7700m) / 7m);
+                    targetCalories = tdee - deficitCalories;
+                    effectiveWeeklyLoss = loss;
+                }
+                else
+                {
+                    // Domyślnie -15%
+                    targetCalories = (int)Math.Round(tdee * 0.85m);
+                    deficitCalories = tdee - targetCalories;
+                    effectiveWeeklyLoss = Math.Round((decimal)deficitCalories * 7m / 7700m, 2);
+                }
+                break;
+
+            case DietGoal.Bulk:
+                if (deficitPercentage.HasValue && deficitPercentage.Value > 0)
+                {
+                    int pct = Math.Clamp(deficitPercentage.Value, 5, 30);
+                    targetCalories = (int)Math.Round(tdee * (1.0m + (pct / 100m)));
+                    deficitCalories = targetCalories - tdee; // nadwyżka
+                    effectiveWeeklyLoss = Math.Round((decimal)deficitCalories * 7m / 7700m, 2);
+                }
+                else if (weeklyChangeKg.HasValue && weeklyChangeKg.Value > 0)
+                {
+                    decimal gain = Math.Clamp(weeklyChangeKg.Value, 0.1m, 0.8m);
+                    deficitCalories = (int)Math.Round((gain * 7700m) / 7m);
+                    targetCalories = tdee + deficitCalories;
+                    effectiveWeeklyLoss = gain;
+                }
+                else
+                {
+                    // Domyślnie +12%
+                    targetCalories = (int)Math.Round(tdee * 1.12m);
+                    deficitCalories = targetCalories - tdee;
+                    effectiveWeeklyLoss = Math.Round((decimal)deficitCalories * 7m / 7700m, 2);
+                }
+                break;
+
+            case DietGoal.Maintain:
+            default:
+                targetCalories = tdee;
+                deficitCalories = 0;
+                effectiveWeeklyLoss = 0m;
+                break;
+        }
+
+        bool isBelowBmr = targetCalories < bmr && goal == DietGoal.Cut;
+        targetCalories = Math.Max(1100, targetCalories);
 
         // Rozkład makroskładników:
         // Białko: 2.0 g/kg na redukcji, 1.8 g/kg na utrzymaniu/masie
@@ -64,13 +128,32 @@ public static class MacroCalculator
         int remainingCalories = Math.Max(200, targetCalories - proteinCalories - fatCalories);
         int carbsGrams = (int)Math.Round(remainingCalories / 4m);
 
+        // Szacowanie czasu do osiągnięcia celu
+        decimal? weightDiff = null;
+        int? estimatedWeeks = null;
+
+        if (targetWeightKg.HasValue && targetWeightKg.Value > 0)
+        {
+            weightDiff = Math.Round(Math.Abs(weightKg - targetWeightKg.Value), 2);
+            if (effectiveWeeklyLoss > 0 && weightDiff > 0)
+            {
+                estimatedWeeks = (int)Math.Ceiling(weightDiff.Value / effectiveWeeklyLoss);
+            }
+        }
+
         return new MacroCalculationResult(
             BmrCalories: bmr,
             TdeeCalories: tdee,
             TargetCalories: targetCalories,
             TargetProteinGrams: proteinGrams,
             TargetCarbsGrams: carbsGrams,
-            TargetFatGrams: fatGrams
+            TargetFatGrams: fatGrams,
+            TargetWeightKg: targetWeightKg,
+            WeightDifferenceKg: weightDiff,
+            WeeklyChangeKg: effectiveWeeklyLoss > 0 ? effectiveWeeklyLoss : null,
+            DeficitCalories: deficitCalories != 0 ? deficitCalories : null,
+            EstimatedWeeks: estimatedWeeks,
+            IsBelowBmr: isBelowBmr
         );
     }
 }

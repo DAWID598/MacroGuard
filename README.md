@@ -65,6 +65,18 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
 - **Szczegółowa tabela dzień po dniu:** Podsumowanie każdego dnia z kolorystycznym wyróżnieniem bilansu i zjedzonych makroskładników.
 - **Gotowy szablon do druku i zapisu PDF:** Układ `@media print` sformatowany pod stronę A4 bez niepotrzebnych pasków przewijania czy elementów UI — przycisk `Drukuj / Zapisz jako PDF` wywołuje systemowy podgląd wydruku.
 
+### 8. Konfiguracja Celów Odchudzania & Wagi Docelowej
+- **Docelowa masa ciała (kg):** Możliwość określenia docelowej wagi (np. *80 kg ➔ 72 kg*, „Cel: zrzucić 8 kg”).
+- **Wybór tempa odchudzania i deficytu:**
+  - *Łagodne* (-10% / ~0.25 - 0.3 kg/tydz) — bez uczucia głodu, wysoki komfort
+  - *Standardowe* (-15% / ~0.50 kg/tydz) — złoty standard dietetyki, ochrona mięśni
+  - *Dynamiczne* (-20% / ~0.75 kg/tydz) — szybsza redukcja, wyraźny deficyt
+  - *Mocne* (-25% / ~1.00 kg/tydz) — maksymalny bezpieczny limit
+  - *Własny %* — możliwość wpisania dowolnego cięcia kalorii (5% – 35%)
+- **Prognoza osiągnięcia celu:** Szacowany czas w tygodniach i miesiącach oraz orientacyjny termin osiągnięcia wymarzonej sylwetki.
+- **Ochrona metabolizmu:** Ostrzeżenie, jeśli wybrane tempo redukcji schodzi poniżej BMR (podstawowej przemiany materii).
+- **Banner w widoku Waga & Postępy:** Dynamiczny kafelek pokazujący ile kg pozostało do osiągnięcia celu wraz z szybkim przejściem do edycji.
+
 ---
 
 ## Szybki Start

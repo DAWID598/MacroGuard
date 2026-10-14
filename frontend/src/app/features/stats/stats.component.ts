@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   AiCoachReportDto,
   LogWeightRequest,
+  UserProfileDto,
   WeeklyWeightStatDto,
   WeightEntryDto,
   WeightStatsSummaryDto
@@ -83,6 +84,38 @@ interface YTick {
           <em>Średniej Tygodniowej</em>.
         </div>
       </div>
+
+      @if (userProfile?.targetWeightKg; as tw) {
+        <div class="target-goal-banner">
+          <div class="tg-left">
+            <div class="tg-icon-box">
+              <mat-icon>flag</mat-icon>
+            </div>
+            <div class="tg-texts">
+              <div class="tg-title">
+                Twój cel wagowy: <strong>{{ tw }} kg</strong>
+              </div>
+              <div class="tg-desc">
+                @if (stats?.currentWeightKg; as cw) {
+                  @if (cw > tw) {
+                    <span>Pozostało jeszcze <strong>{{ (cw - tw) | number:'1.1-1' }} kg</strong> do zrzucenia! Trzymaj wyznaczony deficyt.</span>
+                  } @else if (cw < tw) {
+                    <span>Pozostało jeszcze <strong>{{ (tw - cw) | number:'1.1-1' }} kg</strong> do zbudowania masy.</span>
+                  } @else {
+                    <span>🎉 Gratulacje! Osiągnąłeś swój cel wagowy!</span>
+                  }
+                } @else {
+                  <span>Cel skonfigurowany w kalkulatorze. Zapisz swój pierwszy poranny pomiar wagi poniżej.</span>
+                }
+              </div>
+            </div>
+          </div>
+          <a mat-stroked-button routerLink="/calculator" class="tg-edit-btn">
+            <mat-icon>tune</mat-icon>
+            Zmień cel w kalkulatorze
+          </a>
+        </div>
+      }
 
       <!-- Szybki Zapis Wagi + Metryki KPI -->
       <div class="top-dashboard-grid">
@@ -1002,6 +1035,73 @@ interface YTick {
       }
     }
 
+    .target-goal-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border: 1px solid #86efac;
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+
+      .tg-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .tg-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #16a34a;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      .tg-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #14532d;
+        margin-bottom: 2px;
+      }
+
+      .tg-desc {
+        font-size: 13.5px;
+        color: #166534;
+
+        strong {
+          color: #0f172a;
+        }
+      }
+
+      .tg-edit-btn {
+        background: #ffffff !important;
+        color: #15803d !important;
+        border-color: #86efac !important;
+        font-weight: 600;
+        border-radius: 10px;
+        height: 38px;
+
+        mat-icon {
+          color: #16a34a;
+          margin-right: 4px;
+        }
+      }
+    }
+
     /* Górny panel: Zapis wagi + 4 karty KPI */
     .top-dashboard-grid {
       display: grid;
@@ -1484,12 +1584,18 @@ export class StatsComponent implements OnInit {
   chartLinePath: string = '';
   chartAreaPath: string = '';
 
+  userProfile: UserProfileDto | null = null;
+
   ngOnInit(): void {
     this.loadStats();
     this.loadHistory();
   }
 
   loadStats(): void {
+    this.api.getProfile().subscribe({
+      next: (profile) => this.userProfile = profile
+    });
+
     this.api.getWeightStats().subscribe({
       next: (data) => {
         this.stats = data;

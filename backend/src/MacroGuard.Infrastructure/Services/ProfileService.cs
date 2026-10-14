@@ -37,7 +37,10 @@ public class ProfileService(MacroGuardDbContext dbContext) : IProfileService
             request.WeightKg,
             request.HeightCm,
             request.ActivityLevel,
-            request.Goal
+            request.Goal,
+            request.TargetWeightKg,
+            request.DeficitPercentage,
+            request.WeeklyChangeKg
         );
 
         profile.Age = request.Age;
@@ -46,6 +49,9 @@ public class ProfileService(MacroGuardDbContext dbContext) : IProfileService
         profile.HeightCm = request.HeightCm;
         profile.ActivityLevel = request.ActivityLevel;
         profile.Goal = request.Goal;
+        profile.TargetWeightKg = request.TargetWeightKg;
+        profile.DeficitPercentage = request.DeficitPercentage;
+        profile.WeeklyChangeKg = request.WeeklyChangeKg;
         profile.BmrCalories = calc.BmrCalories;
         profile.TdeeCalories = calc.TdeeCalories;
         profile.TargetCalories = request.CustomCalories ?? calc.TargetCalories;
@@ -55,23 +61,45 @@ public class ProfileService(MacroGuardDbContext dbContext) : IProfileService
         profile.UpdatedAtUtc = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync(ct);
-        return MapToDto(profile);
+        return MapToDto(profile, calc);
     }
 
-    private static UserProfileDto MapToDto(UserProfile p) => new(
-        p.Id,
-        p.Age,
-        p.Gender,
-        p.WeightKg,
-        p.HeightCm,
-        p.ActivityLevel,
-        p.Goal,
-        p.BmrCalories,
-        p.TdeeCalories,
-        p.TargetCalories,
-        p.TargetProteinGrams,
-        p.TargetCarbsGrams,
-        p.TargetFatGrams
-    );
+    private static UserProfileDto MapToDto(UserProfile p, MacroCalculationResult? calc = null)
+    {
+        calc ??= MacroCalculator.Calculate(
+            p.Age,
+            p.Gender,
+            p.WeightKg,
+            p.HeightCm,
+            p.ActivityLevel,
+            p.Goal,
+            p.TargetWeightKg,
+            p.DeficitPercentage,
+            p.WeeklyChangeKg
+        );
+
+        return new(
+            p.Id,
+            p.Age,
+            p.Gender,
+            p.WeightKg,
+            p.HeightCm,
+            p.ActivityLevel,
+            p.Goal,
+            p.BmrCalories,
+            p.TdeeCalories,
+            p.TargetCalories,
+            p.TargetProteinGrams,
+            p.TargetCarbsGrams,
+            p.TargetFatGrams,
+            p.TargetWeightKg,
+            p.DeficitPercentage,
+            p.WeeklyChangeKg ?? calc.WeeklyChangeKg,
+            calc.WeightDifferenceKg,
+            calc.DeficitCalories,
+            calc.EstimatedWeeks,
+            calc.IsBelowBmr
+        );
+    }
 }
 
