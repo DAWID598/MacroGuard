@@ -110,7 +110,7 @@ import { AuthService } from '../../core/services/auth.service';
               </mat-form-field>
 
               <mat-form-field appearance="outline">
-                <mat-label>Hasło (min. 6 znaków)</mat-label>
+                <mat-label>Hasło (min. 10 znaków)</mat-label>
                 <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" />
                 <button
                   type="button"
@@ -120,7 +120,38 @@ import { AuthService } from '../../core/services/auth.service';
                 >
                   <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                 </button>
+                @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
+                  <mat-error>Hasło nie spełnia wymogów bezpieczeństwa</mat-error>
+                }
               </mat-form-field>
+
+              @if ((registerForm.controls.password.value || '').length > 0) {
+                <div class="password-criteria-box">
+                  <div class="crit-title">Wymagania dotyczące hasła:</div>
+                  <div class="crit-grid">
+                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasMinLength">
+                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>Min. 10 znaków</span>
+                    </div>
+                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasUpper">
+                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasUpper ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>Wielka litera (A-Z)</span>
+                    </div>
+                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasLower">
+                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasLower ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>Mała litera (a-z)</span>
+                    </div>
+                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasDigit">
+                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasDigit ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>Cyfra (0-9)</span>
+                    </div>
+                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasSpecial">
+                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasSpecial ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                      <span>Znak specjalny (np. !, &#64;, #, $, *)</span>
+                    </div>
+                  </div>
+                </div>
+              }
 
               <button
                 mat-flat-button
@@ -190,7 +221,7 @@ import { AuthService } from '../../core/services/auth.service';
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="w-100">
-                    <mat-label>Nowe hasło (min. 6 znaków)</mat-label>
+                    <mat-label>Nowe hasło (min. 10 znaków)</mat-label>
                     <input
                       matInput
                       [type]="hidePassword() ? 'password' : 'text'"
@@ -204,7 +235,38 @@ import { AuthService } from '../../core/services/auth.service';
                     >
                       <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
                     </button>
+                    @if (resetForm.controls.newPassword.touched && resetForm.controls.newPassword.invalid) {
+                      <mat-error>Nowe hasło nie spełnia wymogów bezpieczeństwa</mat-error>
+                    }
                   </mat-form-field>
+
+                  @if ((resetForm.controls.newPassword.value || '').length > 0) {
+                    <div class="password-criteria-box">
+                      <div class="crit-title">Wymagania dotyczące nowego hasła:</div>
+                      <div class="crit-grid">
+                        <div class="crit-item" [class.valid]="checkPasswordCriteria(resetForm.controls.newPassword.value).hasMinLength">
+                          <mat-icon>{{ checkPasswordCriteria(resetForm.controls.newPassword.value).hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                          <span>Min. 10 znaków</span>
+                        </div>
+                        <div class="crit-item" [class.valid]="checkPasswordCriteria(resetForm.controls.newPassword.value).hasUpper">
+                          <mat-icon>{{ checkPasswordCriteria(resetForm.controls.newPassword.value).hasUpper ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                          <span>Wielka litera (A-Z)</span>
+                        </div>
+                        <div class="crit-item" [class.valid]="checkPasswordCriteria(resetForm.controls.newPassword.value).hasLower">
+                          <mat-icon>{{ checkPasswordCriteria(resetForm.controls.newPassword.value).hasLower ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                          <span>Mała litera (a-z)</span>
+                        </div>
+                        <div class="crit-item" [class.valid]="checkPasswordCriteria(resetForm.controls.newPassword.value).hasDigit">
+                          <mat-icon>{{ checkPasswordCriteria(resetForm.controls.newPassword.value).hasDigit ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                          <span>Cyfra (0-9)</span>
+                        </div>
+                        <div class="crit-item" [class.valid]="checkPasswordCriteria(resetForm.controls.newPassword.value).hasSpecial">
+                          <mat-icon>{{ checkPasswordCriteria(resetForm.controls.newPassword.value).hasSpecial ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                          <span>Znak specjalny (np. !, &#64;, #, $, *)</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
 
                   <button
                     mat-flat-button
@@ -347,6 +409,51 @@ import { AuthService } from '../../core/services/auth.service';
       }
     }
 
+    .password-criteria-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 12.5px;
+
+      .crit-title {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+      }
+
+      .crit-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px 10px;
+      }
+
+      .crit-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #94a3b8;
+        font-size: 12px;
+        transition: color 0.15s ease;
+
+        mat-icon {
+          font-size: 15px;
+          width: 15px;
+          height: 15px;
+        }
+
+        &.valid {
+          color: #16a34a;
+          font-weight: 600;
+
+          mat-icon {
+            color: #16a34a;
+          }
+        }
+      }
+    }
+
     .submit-btn {
       width: 100%;
       height: 46px;
@@ -374,6 +481,23 @@ export class AuthComponent implements OnInit {
   readonly hidePassword = signal(true);
   readonly isLoading = signal(false);
 
+  readonly passwordValidators = [
+    Validators.required,
+    Validators.minLength(10),
+    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{10,}$/)
+  ];
+
+  checkPasswordCriteria(pwd: string | null | undefined) {
+    const val = pwd || '';
+    return {
+      hasMinLength: val.length >= 10,
+      hasUpper: /[A-Z]/.test(val),
+      hasLower: /[a-z]/.test(val),
+      hasDigit: /\d/.test(val),
+      hasSpecial: /[^a-zA-Z0-9]/.test(val)
+    };
+  }
+
   readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]]
@@ -382,7 +506,7 @@ export class AuthComponent implements OnInit {
   readonly registerForm = this.fb.nonNullable.group({
     displayName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', this.passwordValidators]
   });
 
   readonly forgotForm = this.fb.nonNullable.group({
@@ -392,7 +516,7 @@ export class AuthComponent implements OnInit {
   readonly resetForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     token: ['', [Validators.required]],
-    newPassword: ['', [Validators.required, Validators.minLength(6)]]
+    newPassword: ['', this.passwordValidators]
   });
 
   ngOnInit(): void {

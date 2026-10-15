@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using MacroGuard.Application.DTOs;
 using MacroGuard.Application.Interfaces;
+using MacroGuard.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,6 +42,14 @@ public class DiaryController(IDiaryService diaryService) : ControllerBase
         var userId = GetCurrentUserId();
         var deleted = await diaryService.DeleteMealEntryAsync(userId, id, ct);
         return deleted ? NoContent() : NotFound();
+    }
+
+    [HttpDelete("clear-meal")]
+    public async Task<ActionResult<object>> ClearMeal([FromQuery] DateOnly date, [FromQuery] MealType mealType, CancellationToken ct)
+    {
+        var userId = GetCurrentUserId();
+        var deletedCount = await diaryService.ClearMealAsync(userId, date, mealType, ct);
+        return Ok(new { message = $"Usunięto wszystkie pozycje ({deletedCount}) z posiłku.", count = deletedCount });
     }
 
     [HttpPost("copy-meal")]

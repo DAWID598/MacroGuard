@@ -21,6 +21,7 @@ import {
   LogWeightRequest,
   MacroCalculationResult,
   MealEntryDto,
+  MealType,
   PeriodReportDto,
   UserProfileDto,
   WeightEntryDto,
@@ -73,6 +74,11 @@ export class MacroApiService {
 
   deleteMealEntry(entryId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/diary/${entryId}`);
+  }
+
+  clearMeal(date: string, mealType: MealType): Observable<{ message: string; count: number }> {
+    const params = new HttpParams().set('date', date).set('mealType', mealType.toString());
+    return this.http.delete<{ message: string; count: number }>(`${this.baseUrl}/diary/clear-meal`, { params });
   }
 
   // Generator przepisów AI

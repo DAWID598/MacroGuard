@@ -25,11 +25,12 @@ public static class DependencyInjection
 
         services.AddIdentityCore<ApplicationUser>(options =>
             {
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 6;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequiredLength = 10;
+                options.Password.RequiredUniqueChars = 3;
                 options.User.RequireUniqueEmail = true;
 
                 // Ochrona przed Brute Force — blokada konta po 5 nieudanych próbach na 5 minut
@@ -39,6 +40,7 @@ public static class DependencyInjection
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<MacroGuardDbContext>()
+            .AddErrorDescriber<IdentityPolishErrorDescriber>()
             .AddDefaultTokenProviders();
 
         var jwtKeyProvider = new JwtKeyProvider(configuration, environment);

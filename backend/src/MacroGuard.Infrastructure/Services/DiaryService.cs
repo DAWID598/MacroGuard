@@ -114,6 +114,22 @@ public class DiaryService(MacroGuardDbContext dbContext, IProfileService profile
         return true;
     }
 
+    public async Task<int> ClearMealAsync(Guid userId, DateOnly date, MealType mealType, CancellationToken ct = default)
+    {
+        var entries = await dbContext.MealEntries
+            .Where(e => e.UserId == userId && e.ConsumedDate == date && e.MealType == mealType)
+            .ToListAsync(ct);
+
+        if (entries.Count == 0)
+        {
+            return 0;
+        }
+
+        dbContext.MealEntries.RemoveRange(entries);
+        await dbContext.SaveChangesAsync(ct);
+        return entries.Count;
+    }
+
     public async Task<CopyResultDto> CopyMealAsync(Guid userId, CopyMealRequest request, CancellationToken ct = default)
     {
         var sourceEntries = await dbContext.MealEntries

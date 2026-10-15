@@ -199,6 +199,15 @@ import { ReportDialogComponent } from './report-dialog.component';
                   @if (meal.entries.length > 0) {
                     <button
                       mat-icon-button
+                      class="icon-action-btn clear-meal-btn"
+                      matTooltip="Wyczyść wszystkie pozycje z tego posiłku"
+                      (click)="clearAllEntriesFromMeal(meal)"
+                    >
+                      <mat-icon>delete_sweep</mat-icon>
+                    </button>
+
+                    <button
+                      mat-icon-button
                       class="icon-action-btn"
                       matTooltip="Zapisz ten posiłek jako stały zestaw (Moje Danie)"
                       (click)="saveMealAsSet(meal)"
@@ -660,7 +669,8 @@ import { ReportDialogComponent } from './report-dialog.component';
       }
     }
 
-    .delete-meal-btn {
+    .delete-meal-btn,
+    .clear-meal-btn {
       color: #94a3b8;
       &:hover {
         color: #ef4444;
@@ -1038,6 +1048,27 @@ export class DiaryComponent implements OnInit {
       next: () => {
         this.snackBar.open('Wpis został usunięty.', 'OK', { duration: 2000 });
         this.loadDiary();
+      }
+    });
+  }
+
+  clearAllEntriesFromMeal(meal: MealGroupDto): void {
+    const count = meal.entries.length;
+    if (count === 0) return;
+
+    const countText = count === 1 ? '1 pozycję' : count < 5 ? `${count} pozycje` : `${count} pozycji`;
+    const confirmed = confirm(
+      `Czy na pewno chcesz usunąć wszystkie pozycje (${countText}) z posiłku "${meal.mealName}"?\n\nTej operacji nie można cofnąć.`
+    );
+    if (!confirmed) return;
+
+    this.api.clearMeal(this.selectedDate(), meal.mealType).subscribe({
+      next: (res) => {
+        this.snackBar.open(res.message || `Wyczyszczono posiłek "${meal.mealName}".`, 'OK', { duration: 3000 });
+        this.loadDiary();
+      },
+      error: () => {
+        this.snackBar.open(`Nie udało się wyczyścić posiłku "${meal.mealName}".`, 'Zamknij', { duration: 3000 });
       }
     });
   }
