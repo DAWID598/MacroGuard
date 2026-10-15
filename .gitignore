@@ -5,6 +5,11 @@ obj/
 *.user
 *.suo
 appsettings.Development.Local.json
+.dev-jwt.key
+*.key
+.env
+.env.*
+
 
 # Angular / Node
 node_modules/

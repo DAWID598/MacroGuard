@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using MacroGuard.Application.DTOs;
+using MacroGuard.Application.Exceptions;
 using MacroGuard.Application.Interfaces;
 using MacroGuard.Domain.Entities;
 using MacroGuard.Domain.Enums;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 using Microsoft.Extensions.Logging;
+using MacroGuard.Infrastructure.Security;
 
 namespace MacroGuard.Infrastructure.Services;
 
@@ -20,6 +22,7 @@ public class AuthService(
     UserManager<ApplicationUser> userManager,
     MacroGuardDbContext dbContext,
     IConfiguration configuration,
+    IJwtKeyProvider jwtKeyProvider,
     ILogger<AuthService> logger,
     IEmailSender emailSender) : IAuthService
 {
@@ -75,10 +78,57 @@ public class AuthService(
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {
         var user = await userManager.FindByEmailAsync(request.Email);
-        if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
+        if (user is null)
         {
+            // Nie ujawniamy czy użytkownik istnieje w bazie (zapobieganie user enumeration)
             throw new UnauthorizedAccessException("Nieprawidłowy adres e-mail lub hasło.");
         }
+
+        // 1. Sprawdź, czy konto jest aktualnie zablokowane
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            var lockoutEnd = await userManager.GetLockoutEndDateAsync(user);
+            var remainingMinutes = lockoutEnd.HasValue 
+                ? Math.Max(1, (int)Math.Ceiling((lockoutEnd.Value - DateTimeOffset.UtcNow).TotalMinutes)) 
+                : 5;
+
+            logger.LogWarning("Zablokowano próbę logowania na zablokowane konto: {Email}. Pozostało minut: {Minutes}", user.Email, remainingMinutes);
+            throw new AccountLockedException($"Konto zostało tymczasowo zablokowane z powodu 5 nieudanych prób logowania. Spróbuj ponownie za {remainingMinutes} min.");
+        }
+
+        // Upewnij się, że Lockout jest włączony dla konta
+        if (!user.LockoutEnabled)
+        {
+            await userManager.SetLockoutEnabledAsync(user, true);
+        }
+
+        // 2. Weryfikacja hasła
+        var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
+        if (!isPasswordValid)
+        {
+            // Zwiększ licznik nieudanych prób logowania w ASP.NET Core Identity
+            await userManager.AccessFailedAsync(user);
+
+            if (await userManager.IsLockedOutAsync(user))
+            {
+                logger.LogWarning("Konto {Email} osiągnęło limit 5 nieudanych prób i zostało zablokowane na 5 minut.", user.Email);
+                throw new AccountLockedException("Konto zostało zablokowane na 5 minut z powodu 5 nieudanych prób logowania. Spróbuj ponownie później.");
+            }
+
+            var failedCount = await userManager.GetAccessFailedCountAsync(user);
+            var remaining = 5 - failedCount;
+            logger.LogWarning("Błędne hasło dla konta {Email}. Licznik nieudanych prób: {FailedCount}/5.", user.Email, failedCount);
+
+            if (remaining > 0 && remaining <= 2)
+            {
+                throw new UnauthorizedAccessException($"Nieprawidłowy adres e-mail lub hasło. Uwaga: pozostała {remaining} próba przed blokadą konta na 5 minut.");
+            }
+
+            throw new UnauthorizedAccessException("Nieprawidłowy adres e-mail lub hasło.");
+        }
+
+        // 3. Po udanym zalogowaniu resetujemy licznik nieudanych prób
+        await userManager.ResetAccessFailedCountAsync(user);
 
         var token = GenerateJwtToken(user);
         return new AuthResponse(token, user.Id, user.Email!, user.DisplayName);
@@ -143,15 +193,19 @@ public class AuthService(
             throw new InvalidOperationException($"Nie udało się zresetować hasła: {errors}");
         }
 
+        // Zresetuj ewentualną blokadę konta i licznik nieudanych prób po poprawnym zresetowaniu hasła
+        await userManager.SetLockoutEndDateAsync(user, null);
+        await userManager.ResetAccessFailedCountAsync(user);
+
         logger.LogInformation("Hasło użytkownika {Email} zostało pomyślnie zresetowane.", user.Email);
         return true;
     }
 
     private string GenerateJwtToken(ApplicationUser user)
     {
-        var jwtKey = configuration["Jwt:Key"] ?? "MacroGuard_SuperSecretDevelopmentKey_2026_AtLeast32Bytes!";
-        var jwtIssuer = configuration["Jwt:Issuer"] ?? "MacroGuard.Api";
-        var jwtAudience = configuration["Jwt:Audience"] ?? "MacroGuard.Client";
+        var jwtKey = jwtKeyProvider.GetSigningKey();
+        var jwtIssuer = jwtKeyProvider.GetIssuer();
+        var jwtAudience = jwtKeyProvider.GetAudience();
 
         var claims = new List<Claim>
         {

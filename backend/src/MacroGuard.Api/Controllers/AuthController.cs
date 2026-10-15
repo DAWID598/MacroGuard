@@ -1,11 +1,14 @@
 using MacroGuard.Application.DTOs;
+using MacroGuard.Application.Exceptions;
 using MacroGuard.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace MacroGuard.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting("auth-endpoints")]
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
@@ -29,6 +32,10 @@ public class AuthController(IAuthService authService) : ControllerBase
         {
             var response = await authService.LoginAsync(request, ct);
             return Ok(response);
+        }
+        catch (AccountLockedException ex)
+        {
+            return StatusCode(StatusCodes.Status423Locked, new { message = ex.Message });
         }
         catch (UnauthorizedAccessException ex)
         {

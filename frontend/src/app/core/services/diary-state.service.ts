@@ -9,7 +9,7 @@ export class DiaryStateService {
   private getInitialCount(): number {
     try {
       const raw = localStorage.getItem('macroguard_persistent_meals');
-      if (raw) {
+      if (raw !== null) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           return 4 + parsed.length;

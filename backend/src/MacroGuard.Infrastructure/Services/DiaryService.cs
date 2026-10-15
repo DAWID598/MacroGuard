@@ -14,9 +14,9 @@ public class DiaryService(MacroGuardDbContext dbContext, IProfileService profile
         (MealType.Breakfast, "Śniadanie"),
         (MealType.SecondBreakfast, "II Śniadanie"),
         (MealType.Lunch, "Obiad"),
+        (MealType.Snack, "Przekąska"),
         (MealType.AfternoonSnack, "Podwieczorek"),
         (MealType.Dinner, "Kolacja"),
-        (MealType.Snack, "Przekąska"),
         (MealType.PreWorkout, "Posiłek przedtreningowy"),
         (MealType.PostWorkout, "Posiłek potreningowy"),
         (MealType.ExtraMeal, "Dodatkowy posiłek"),
@@ -26,8 +26,8 @@ public class DiaryService(MacroGuardDbContext dbContext, IProfileService profile
     private static readonly HashSet<MealType> CoreMealTypes =
     [
         MealType.Breakfast,
+        MealType.SecondBreakfast,
         MealType.Lunch,
-        MealType.Snack,
         MealType.Dinner
     ];
 

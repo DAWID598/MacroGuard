@@ -2,19 +2,21 @@ using System.Text;
 using MacroGuard.Application.Interfaces;
 using MacroGuard.Infrastructure.Identity;
 using MacroGuard.Infrastructure.Persistence;
+using MacroGuard.Infrastructure.Security;
 using MacroGuard.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MacroGuard.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IHostEnvironment? environment = null)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? "Host=localhost;Port=5432;Database=macroguard_db;Username=macroguard;Password=macroguard_dev_password";
@@ -30,14 +32,18 @@ public static class DependencyInjection
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 6;
                 options.User.RequireUniqueEmail = true;
+
+                // Ochrona przed Brute Force — blokada konta po 5 nieudanych próbach na 5 minut
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<MacroGuardDbContext>()
             .AddDefaultTokenProviders();
 
-        var jwtKey = configuration["Jwt:Key"] ?? "MacroGuard_SuperSecretDevelopmentKey_2026_AtLeast32Bytes!";
-        var jwtIssuer = configuration["Jwt:Issuer"] ?? "MacroGuard.Api";
-        var jwtAudience = configuration["Jwt:Audience"] ?? "MacroGuard.Client";
+        var jwtKeyProvider = new JwtKeyProvider(configuration, environment);
+        services.AddSingleton<IJwtKeyProvider>(jwtKeyProvider);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -48,9 +54,9 @@ public static class DependencyInjection
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtIssuer,
-                    ValidAudience = jwtAudience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                    ValidIssuer = jwtKeyProvider.GetIssuer(),
+                    ValidAudience = jwtKeyProvider.GetAudience(),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKeyProvider.GetSigningKey()))
                 };
             });
 

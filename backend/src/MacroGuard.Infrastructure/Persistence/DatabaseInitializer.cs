@@ -4,17 +4,22 @@ using MacroGuard.Domain.Services;
 using MacroGuard.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace MacroGuard.Infrastructure.Persistence;
 
 public static class DatabaseInitializer
 {
-    public static async Task InitializeAsync(IServiceProvider services)
+    public static async Task InitializeAsync(IServiceProvider services, IHostEnvironment? environment = null)
     {
         var context = services.GetRequiredService<MacroGuardDbContext>();
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+        var configuration = services.GetRequiredService<IConfiguration>();
+        var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("DatabaseInitializer");
 
         await context.Database.EnsureCreatedAsync();
 
@@ -81,79 +86,117 @@ public static class DatabaseInitializer
             }
         }
 
-        // 3. Seed konta Admina (admin@macroguard.pl / Admin123!)
-        await EnsureSeededUserAsync(
-            userManager,
-            context,
-            email: "admin@macroguard.pl",
-            password: "Admin123!",
-            displayName: "Administrator",
-            role: "Admin",
-            age: 30,
-            weightKg: 82m,
-            heightCm: 182m,
-            goal: DietGoal.Maintain,
-            seedSampleMeals: false
-        );
+        // 3. Bezpieczne tworzenie kont użytkowników — [VULN-002 fix]
+        // Hasła i konta użytkowników NIE MOGĄ być zahardkodowane w kodzie źródłowym ani w repozytorium!
+        // W środowisku produkcyjnym konta użytkowników są tworzone wyłącznie poprzez standardową rejestrację,
+        // a opcjonalny administrator początkowy może zostać utworzony WYŁĄCZNIE, gdy jawnie
+        // przekazano zmienne środowiskowe (INITIAL_ADMIN_EMAIL oraz INITIAL_ADMIN_PASSWORD).
+        var isProduction = environment?.IsProduction()
+            ?? string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase);
 
-        // 4. Seed konta Testowego (test@macroguard.pl / Test123!) z przykładowym dziennikiem na dziś
-        await EnsureSeededUserAsync(
-            userManager,
-            context,
-            email: "test@macroguard.pl",
-            password: "Test123!",
-            displayName: "Dawid (Test)",
-            role: "User",
-            age: 26,
-            weightKg: 78m,
-            heightCm: 180m,
-            goal: DietGoal.Cut,
-            seedSampleMeals: true
-        );
+        var adminEmail = configuration["SeedData:AdminEmail"]
+            ?? Environment.GetEnvironmentVariable("INITIAL_ADMIN_EMAIL")
+            ?? Environment.GetEnvironmentVariable("MACROGUARD_ADMIN_EMAIL");
 
-        // 5. Seed przykładowych pomiarów wagi dla konta testowego (ostatnie 21 dni)
-        var testUser = await userManager.FindByEmailAsync("test@macroguard.pl");
-        if (testUser is not null && !await context.WeightEntries.AnyAsync(w => w.UserId == testUser.Id))
+        var adminPassword = configuration["SeedData:AdminPassword"]
+            ?? Environment.GetEnvironmentVariable("INITIAL_ADMIN_PASSWORD")
+            ?? Environment.GetEnvironmentVariable("MACROGUARD_ADMIN_PASSWORD");
+
+        if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword))
         {
-            var today = DateOnly.FromDateTime(DateTime.Today);
-            var sampleWeights = new (int daysAgo, decimal weight, string? note)[]
+            if (adminPassword.Length < 8)
             {
-                (20, 79.8m, "Początek pomiarów"),
-                (19, 79.9m, null),
-                (18, 79.6m, null),
-                (17, 79.5m, "Po treningu"),
-                (16, 79.7m, "Po słonej kolacji"),
-                (15, 79.3m, null),
-                (14, 79.2m, null),
-                (13, 79.0m, null),
-                (12, 79.1m, null),
-                (11, 78.8m, "Lekki spadek"),
-                (10, 78.9m, null),
-                (9, 78.6m, null),
-                (8, 78.7m, null),
-                (7, 78.5m, null),
-                (6, 78.4m, null),
-                (5, 78.3m, "Na czczo"),
-                (4, 78.4m, null),
-                (3, 78.2m, null),
-                (2, 78.1m, null),
-                (1, 78.0m, null),
-                (0, 77.9m, "Dziś rano")
-            };
-
-            foreach (var item in sampleWeights)
-            {
-                context.WeightEntries.Add(new WeightEntry
-                {
-                    UserId = testUser.Id,
-                    Date = today.AddDays(-item.daysAgo),
-                    WeightKg = item.weight,
-                    Note = item.note,
-                    CreatedAtUtc = DateTime.UtcNow.AddDays(-item.daysAgo)
-                });
+                logger.LogWarning("Hasło początkowego administratora jest zbyt krótkie (wymagane min. 8 znaków). Pominięto tworzenie konta administratora.");
             }
+            else
+            {
+                await EnsureSeededUserAsync(
+                    userManager,
+                    context,
+                    email: adminEmail.Trim(),
+                    password: adminPassword,
+                    displayName: "Administrator",
+                    role: "Admin",
+                    age: 30,
+                    weightKg: 82m,
+                    heightCm: 182m,
+                    goal: DietGoal.Maintain,
+                    seedSampleMeals: false
+                );
+                logger.LogInformation("Zainicjalizowano konto administratora dla {Email} ze zmiennych środowiskowych/konfiguracji.", adminEmail);
+            }
+        }
 
-            await context.SaveChangesAsync();
+        // W środowisku deweloperskim: opcjonalne seedowanie konta demonstracyjnego
+        // wyłącznie jeśli jawnie skonfigurowano zmienne środowiskowe lub User Secrets.
+        if (!isProduction)
+        {
+            var testEmail = configuration["SeedData:TestUserEmail"]
+                ?? Environment.GetEnvironmentVariable("INITIAL_TEST_EMAIL");
+
+            var testPassword = configuration["SeedData:TestUserPassword"]
+                ?? Environment.GetEnvironmentVariable("INITIAL_TEST_PASSWORD");
+
+            if (!string.IsNullOrWhiteSpace(testEmail) && !string.IsNullOrWhiteSpace(testPassword))
+            {
+                await EnsureSeededUserAsync(
+                    userManager,
+                    context,
+                    email: testEmail.Trim(),
+                    password: testPassword,
+                    displayName: "Użytkownik Testowy",
+                    role: "User",
+                    age: 26,
+                    weightKg: 78m,
+                    heightCm: 180m,
+                    goal: DietGoal.Cut,
+                    seedSampleMeals: true
+                );
+
+                var testUser = await userManager.FindByEmailAsync(testEmail.Trim());
+                if (testUser is not null && !await context.WeightEntries.AnyAsync(w => w.UserId == testUser.Id))
+                {
+                    var today = DateOnly.FromDateTime(DateTime.Today);
+                    var sampleWeights = new (int daysAgo, decimal weight, string? note)[]
+                    {
+                        (20, 79.8m, "Początek pomiarów"),
+                        (19, 79.9m, null),
+                        (18, 79.6m, null),
+                        (17, 79.5m, "Po treningu"),
+                        (16, 79.7m, "Po słonej kolacji"),
+                        (15, 79.3m, null),
+                        (14, 79.2m, null),
+                        (13, 79.0m, null),
+                        (12, 79.1m, null),
+                        (11, 78.8m, "Lekki spadek"),
+                        (10, 78.9m, null),
+                        (9, 78.6m, null),
+                        (8, 78.7m, null),
+                        (7, 78.5m, null),
+                        (6, 78.4m, null),
+                        (5, 78.3m, "Na czczo"),
+                        (4, 78.4m, null),
+                        (3, 78.2m, null),
+                        (2, 78.1m, null),
+                        (1, 78.0m, null),
+                        (0, 77.9m, "Dziś rano")
+                    };
+
+                    foreach (var item in sampleWeights)
+                    {
+                        context.WeightEntries.Add(new WeightEntry
+                        {
+                            UserId = testUser.Id,
+                            Date = today.AddDays(-item.daysAgo),
+                            WeightKg = item.weight,
+                            Note = item.note,
+                            CreatedAtUtc = DateTime.UtcNow.AddDays(-item.daysAgo)
+                        });
+                    }
+
+                    await context.SaveChangesAsync();
+                }
+            }
         }
     }
 

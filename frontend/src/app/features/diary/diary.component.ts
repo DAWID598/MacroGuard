@@ -719,7 +719,7 @@ export class DiaryComponent implements OnInit {
   private readonly PERSISTENT_MEALS_KEY = 'macroguard_persistent_meals';
 
   readonly allExtraMealDefinitions = [
-    { type: MealType.SecondBreakfast, label: 'II Śniadanie', icon: 'brunch_dining' },
+    { type: MealType.Snack, label: 'Przekąska', icon: 'cookie' },
     { type: MealType.AfternoonSnack, label: 'Podwieczorek', icon: 'free_breakfast' },
     { type: MealType.PreWorkout, label: 'Posiłek przedtreningowy', icon: 'bolt' },
     { type: MealType.PostWorkout, label: 'Posiłek potreningowy', icon: 'fitness_center' },
@@ -729,6 +729,7 @@ export class DiaryComponent implements OnInit {
 
   readonly persistentExtraMeals = signal<MealType[]>(this.loadPersistentMeals());
   readonly dayExtraMealsByDate = signal<Record<string, MealType[]>>({});
+  readonly dayRemovedMealsByDate = signal<Record<string, MealType[]>>({});
 
   readonly dayExtraMeals = computed<MealType[]>(() => {
     return this.dayExtraMealsByDate()[this.selectedDate()] ?? [];
@@ -741,13 +742,16 @@ export class DiaryComponent implements OnInit {
     const d = this.diary();
     if (!d) return [];
 
-    const backendMeals = d.meals ?? [];
+    const date = this.selectedDate();
+    const removedToday = new Set(this.dayRemovedMealsByDate()[date] ?? []);
+
+    const backendMeals = (d.meals ?? []).filter(m => !removedToday.has(m.mealType) || m.entries.length > 0);
     const activeTypes = new Set<MealType>(backendMeals.map(m => m.mealType));
 
     const extraCandidates = [
       ...this.persistentExtraMeals(),
       ...this.dayExtraMeals()
-    ];
+    ].filter(t => !removedToday.has(t));
 
     const result: MealGroupDto[] = [...backendMeals];
 
@@ -814,7 +818,7 @@ export class DiaryComponent implements OnInit {
   }
 
   isExtraMeal(type: MealType): boolean {
-    return type === MealType.SecondBreakfast ||
+    return type === MealType.Snack ||
            type === MealType.AfternoonSnack ||
            type === MealType.PreWorkout ||
            type === MealType.PostWorkout ||
@@ -827,9 +831,9 @@ export class DiaryComponent implements OnInit {
       case MealType.Breakfast: return 1;
       case MealType.SecondBreakfast: return 2;
       case MealType.Lunch: return 3;
-      case MealType.AfternoonSnack: return 4;
-      case MealType.Dinner: return 5;
-      case MealType.Snack: return 6;
+      case MealType.Snack: return 4;
+      case MealType.AfternoonSnack: return 5;
+      case MealType.Dinner: return 6;
       case MealType.PreWorkout: return 7;
       case MealType.PostWorkout: return 8;
       case MealType.ExtraMeal: return 9;
@@ -883,6 +887,14 @@ export class DiaryComponent implements OnInit {
 
   addExtraMeal(type: MealType): void {
     const date = this.selectedDate();
+    const removed = this.dayRemovedMealsByDate()[date] ?? [];
+    if (removed.includes(type)) {
+      this.dayRemovedMealsByDate.update(map => ({
+        ...map,
+        [date]: removed.filter(t => t !== type)
+      }));
+    }
+
     const current = this.dayExtraMealsByDate()[date] ?? [];
     if (!current.includes(type)) {
       this.dayExtraMealsByDate.update(map => ({
@@ -928,6 +940,14 @@ export class DiaryComponent implements OnInit {
 
   removeExtraMeal(type: MealType): void {
     const date = this.selectedDate();
+    const removed = this.dayRemovedMealsByDate()[date] ?? [];
+    if (!removed.includes(type)) {
+      this.dayRemovedMealsByDate.update(map => ({
+        ...map,
+        [date]: [...removed, type]
+      }));
+    }
+
     const current = this.dayExtraMealsByDate()[date] ?? [];
     this.dayExtraMealsByDate.update(map => ({
       ...map,
@@ -945,9 +965,11 @@ export class DiaryComponent implements OnInit {
   private loadPersistentMeals(): MealType[] {
     try {
       const raw = localStorage.getItem(this.PERSISTENT_MEALS_KEY);
-      if (raw) {
+      if (raw !== null) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed as MealType[];
+        if (Array.isArray(parsed)) {
+          return (parsed as MealType[]).filter(t => t !== MealType.SecondBreakfast);
+        }
       }
     } catch {}
     return [];
