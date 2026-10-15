@@ -5,8 +5,10 @@ namespace MacroGuard.Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default);
+    Task<RegisterResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default);
     Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default);
+    Task<bool> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken ct = default);
+    Task<string> ResendConfirmationEmailAsync(ResendConfirmationEmailRequest request, CancellationToken ct = default);
     Task<ForgotPasswordResponse> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default);
     Task<bool> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default);
 }

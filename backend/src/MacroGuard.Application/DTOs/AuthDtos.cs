@@ -24,6 +24,25 @@ public record AuthResponse(
     string DisplayName
 );
 
+public record RegisterResponse(
+    string Message,
+    string Email,
+    bool RequiresEmailConfirmation = true
+);
+
+public record ConfirmEmailRequest(
+    [Required(ErrorMessage = "Adres e-mail jest wymagany."), EmailAddress(ErrorMessage = "Nieprawidłowy format adresu e-mail.")] string Email,
+    [Required(ErrorMessage = "Token weryfikacyjny jest wymagany.")] string Token
+);
+
+public record ConfirmEmailResponse(
+    string Message
+);
+
+public record ResendConfirmationEmailRequest(
+    [Required(ErrorMessage = "Adres e-mail jest wymagany."), EmailAddress(ErrorMessage = "Nieprawidłowy format adresu e-mail.")] string Email
+);
+
 public record ForgotPasswordRequest(
     [Required(ErrorMessage = "Adres e-mail jest wymagany."), EmailAddress(ErrorMessage = "Nieprawidłowy format adresu e-mail.")] string Email
 );

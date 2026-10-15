@@ -39,6 +39,25 @@ export interface AuthResponse {
   displayName: string;
 }
 
+export interface RegisterResponse {
+  message: string;
+  email: string;
+  requiresEmailConfirmation: boolean;
+}
+
+export interface ConfirmEmailRequest {
+  email: string;
+  token: string;
+}
+
+export interface ConfirmEmailResponse {
+  message: string;
+}
+
+export interface ResendConfirmationEmailRequest {
+  email: string;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }

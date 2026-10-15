@@ -37,6 +37,9 @@ public static class DependencyInjection
                 options.Lockout.AllowedForNewUsers = true;
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+
+                // Wymóg potwierdzenia adresu e-mail przed zalogowaniem
+                options.SignIn.RequireConfirmedEmail = true;
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<MacroGuardDbContext>()

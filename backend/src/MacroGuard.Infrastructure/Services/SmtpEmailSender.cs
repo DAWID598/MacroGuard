@@ -23,10 +23,13 @@ public class SmtpEmailSender(
         if (string.IsNullOrWhiteSpace(host))
         {
             logger.LogWarning(
-                "[SMTP] Brak skonfigurowanego hosta SMTP w appsettings.json.\n" +
-                "Wiadomość e-mail do: {ToEmail}\nTemat: {Subject}",
+                "[SMTP Dev Mode] Brak skonfigurowanego hosta SMTP w konfiguracji.\n" +
+                "=======================================================================\n" +
+                "Wiadomość e-mail do: {ToEmail}\nTemat: {Subject}\nTreść HTML:\n{HtmlMessage}\n" +
+                "=======================================================================",
                 toEmail,
-                subject
+                subject,
+                htmlMessage
             );
             return;
         }

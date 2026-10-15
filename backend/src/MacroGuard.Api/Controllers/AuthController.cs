@@ -12,7 +12,7 @@ namespace MacroGuard.Api.Controllers;
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken ct)
+    public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
         try
         {
@@ -37,10 +37,39 @@ public class AuthController(IAuthService authService) : ControllerBase
         {
             return StatusCode(StatusCodes.Status423Locked, new { message = ex.Message });
         }
+        catch (EmailNotConfirmedException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = ex.Message, requiresEmailConfirmation = true, email = ex.Email ?? request.Email });
+        }
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(new { message = ex.Message });
         }
+    }
+
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await authService.ConfirmEmailAsync(request, ct);
+            return Ok(new ConfirmEmailResponse("Adres e-mail został pomyślnie potwierdzony. Możesz się teraz zalogować."));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("resend-confirmation-email")]
+    public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest request, CancellationToken ct)
+    {
+        var message = await authService.ResendConfirmationEmailAsync(request, ct);
+        return Ok(new { message });
     }
 
     [HttpPost("forgot-password")]

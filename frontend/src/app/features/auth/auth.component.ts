@@ -47,6 +47,37 @@ import { AuthService } from '../../core/services/auth.service';
           <!-- LOGOWANIE -->
           <mat-tab label="Logowanie">
             <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+              @if (emailConfirmedSuccess()) {
+                <div class="email-confirmed-badge">
+                  <mat-icon>check_circle</mat-icon>
+                  <div>
+                    <strong>Adres e-mail został pomyślnie potwierdzony!</strong>
+                    <p>Możesz teraz bezpiecznie zalogować się do swojego konta.</p>
+                  </div>
+                </div>
+              }
+
+              @if (unconfirmedEmail()) {
+                <div class="email-unconfirmed-box">
+                  <mat-icon>mark_email_unread</mat-icon>
+                  <div class="warning-text">
+                    <strong>Wymagana aktywacja konta</strong>
+                    <p>Adres <strong>{{ unconfirmedEmail() }}</strong> nie został jeszcze zweryfikowany.</p>
+                    <button
+                      type="button"
+                      mat-button
+                      color="primary"
+                      class="resend-inline-btn"
+                      (click)="resendActivation(unconfirmedEmail()!)"
+                      [disabled]="isLoading()"
+                    >
+                      <mat-icon>send</mat-icon>
+                      Wyślij link aktywacyjny ponownie
+                    </button>
+                  </div>
+                </div>
+              }
+
               <mat-form-field appearance="outline">
                 <mat-label>Adres e-mail</mat-label>
                 <input matInput type="email" formControlName="email" placeholder="jan@example.com" />
@@ -96,77 +127,123 @@ import { AuthService } from '../../core/services/auth.service';
 
           <!-- REJESTRACJA -->
           <mat-tab label="Rejestracja">
-            <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="auth-form">
-              <mat-form-field appearance="outline">
-                <mat-label>Twoje imię / pseudonim</mat-label>
-                <input matInput formControlName="displayName" placeholder="Dawid" />
-                <mat-icon matSuffix>person_outline</mat-icon>
-              </mat-form-field>
+            @if (registrationSuccessEmail()) {
+              <div class="activation-notice-card">
+                <div class="activation-icon-circle">
+                  <mat-icon>mark_email_read</mat-icon>
+                </div>
+                <h3>Sprawdź swoją skrzynkę e-mail!</h3>
+                <p>Na adres <strong>{{ registrationSuccessEmail() }}</strong> wysłaliśmy wiadomość z linkiem aktywacyjnym.</p>
+                <p class="activation-hint">
+                  Przed pierwszym zalogowaniem kliknij w otrzymany link, aby zweryfikować konto i zabezpieczyć swój profil.
+                </p>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Adres e-mail</mat-label>
-                <input matInput type="email" formControlName="email" placeholder="dawid@example.com" />
-                <mat-icon matSuffix>mail_outline</mat-icon>
-              </mat-form-field>
+                <div class="activation-actions">
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    class="submit-btn"
+                    (click)="goToLoginWithEmail(registrationSuccessEmail()!)"
+                  >
+                    <mat-icon>login</mat-icon>
+                    Przejdź do logowania
+                  </button>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Hasło (min. 10 znaków)</mat-label>
-                <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" />
-                <button
-                  type="button"
-                  mat-icon-button
-                  matSuffix
-                  (click)="hidePassword.set(!hidePassword())"
-                >
-                  <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-                </button>
-                @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
-                  <mat-error>Hasło nie spełnia wymogów bezpieczeństwa</mat-error>
-                }
-              </mat-form-field>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="resend-action-btn"
+                    (click)="resendActivation(registrationSuccessEmail()!)"
+                    [disabled]="isLoading()"
+                  >
+                    <mat-icon>send</mat-icon>
+                    Wyślij link aktywacyjny ponownie
+                  </button>
 
-              @if ((registerForm.controls.password.value || '').length > 0) {
-                <div class="password-criteria-box">
-                  <div class="crit-title">Wymagania dotyczące hasła:</div>
-                  <div class="crit-grid">
-                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasMinLength">
-                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-                      <span>Min. 10 znaków</span>
-                    </div>
-                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasUpper">
-                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasUpper ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-                      <span>Wielka litera (A-Z)</span>
-                    </div>
-                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasLower">
-                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasLower ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-                      <span>Mała litera (a-z)</span>
-                    </div>
-                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasDigit">
-                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasDigit ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-                      <span>Cyfra (0-9)</span>
-                    </div>
-                    <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasSpecial">
-                      <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasSpecial ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-                      <span>Znak specjalny (np. !, &#64;, #, $, *)</span>
+                  <button
+                    type="button"
+                    mat-button
+                    class="another-account-btn"
+                    (click)="resetRegistrationView()"
+                  >
+                    Zarejestruj inny adres e-mail
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="auth-form">
+                <mat-form-field appearance="outline">
+                  <mat-label>Twoje imię / pseudonim</mat-label>
+                  <input matInput formControlName="displayName" placeholder="Dawid" />
+                  <mat-icon matSuffix>person_outline</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Adres e-mail</mat-label>
+                  <input matInput type="email" formControlName="email" placeholder="dawid@example.com" />
+                  <mat-icon matSuffix>mail_outline</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Hasło (min. 10 znaków)</mat-label>
+                  <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" />
+                  <button
+                    type="button"
+                    mat-icon-button
+                    matSuffix
+                    (click)="hidePassword.set(!hidePassword())"
+                  >
+                    <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                  @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
+                    <mat-error>Hasło nie spełnia wymogów bezpieczeństwa</mat-error>
+                  }
+                </mat-form-field>
+
+                @if ((registerForm.controls.password.value || '').length > 0) {
+                  <div class="password-criteria-box">
+                    <div class="crit-title">Wymagania dotyczące hasła:</div>
+                    <div class="crit-grid">
+                      <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasMinLength">
+                        <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasMinLength ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <span>Min. 10 znaków</span>
+                      </div>
+                      <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasUpper">
+                        <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasUpper ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <span>Wielka litera (A-Z)</span>
+                      </div>
+                      <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasLower">
+                        <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasLower ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <span>Mała litera (a-z)</span>
+                      </div>
+                      <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasDigit">
+                        <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasDigit ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <span>Cyfra (0-9)</span>
+                      </div>
+                      <div class="crit-item" [class.valid]="checkPasswordCriteria(registerForm.controls.password.value).hasSpecial">
+                        <mat-icon>{{ checkPasswordCriteria(registerForm.controls.password.value).hasSpecial ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                        <span>Znak specjalny (np. !, &#64;, #, $, *)</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              }
-
-              <button
-                mat-flat-button
-                color="primary"
-                type="submit"
-                class="submit-btn"
-                [disabled]="registerForm.invalid || isLoading()"
-              >
-                @if (isLoading()) {
-                  <mat-spinner diameter="20"></mat-spinner>
-                } @else {
-                  Utwórz darmowe konto
                 }
-              </button>
-            </form>
+
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="submit"
+                  class="submit-btn"
+                  [disabled]="registerForm.invalid || isLoading()"
+                >
+                  @if (isLoading()) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    Utwórz darmowe konto
+                  }
+                </button>
+              </form>
+            }
           </mat-tab>
 
           <!-- RESET HASŁA -->
@@ -454,6 +531,156 @@ import { AuthService } from '../../core/services/auth.service';
       }
     }
 
+    .email-confirmed-badge {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      color: #166534;
+
+      mat-icon {
+        color: #16a34a;
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+
+      strong {
+        display: block;
+        font-size: 13.5px;
+        margin-bottom: 2px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 12.5px;
+        line-height: 1.4;
+      }
+    }
+
+    .email-unconfirmed-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      color: #92400e;
+
+      mat-icon {
+        color: #d97706;
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+
+      .warning-text {
+        min-width: 0;
+        flex: 1;
+
+        strong {
+          display: block;
+          font-size: 13.5px;
+          margin-bottom: 2px;
+        }
+
+        p {
+          margin: 0 0 6px;
+          font-size: 12.5px;
+          line-height: 1.4;
+        }
+      }
+
+      .resend-inline-btn {
+        padding: 0;
+        height: 28px;
+        font-size: 12.5px;
+        font-weight: 600;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          margin-right: 4px;
+        }
+      }
+    }
+
+    .activation-notice-card {
+      text-align: center;
+      padding: 18px 8px 10px;
+
+      .activation-icon-circle {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #eef2ff;
+        color: #3f51b5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 14px;
+
+        mat-icon {
+          font-size: 30px;
+          width: 30px;
+          height: 30px;
+        }
+      }
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      p {
+        margin: 0 0 8px;
+        font-size: 13.5px;
+        color: #475569;
+        line-height: 1.45;
+      }
+
+      .activation-hint {
+        font-size: 12.5px;
+        color: #64748b;
+        margin-bottom: 20px;
+      }
+
+      .activation-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        .resend-action-btn {
+          height: 44px;
+          border-radius: 10px;
+          font-weight: 600;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+          }
+        }
+
+        .another-account-btn {
+          font-size: 13px;
+          color: #64748b;
+        }
+      }
+    }
+
     .submit-btn {
       width: 100%;
       height: 46px;
@@ -480,6 +707,10 @@ export class AuthComponent implements OnInit {
   readonly resetStep = signal(1);
   readonly hidePassword = signal(true);
   readonly isLoading = signal(false);
+
+  readonly registrationSuccessEmail = signal<string | null>(null);
+  readonly unconfirmedEmail = signal<string | null>(null);
+  readonly emailConfirmedSuccess = signal<boolean>(false);
 
   readonly passwordValidators = [
     Validators.required,
@@ -525,7 +756,9 @@ export class AuthComponent implements OnInit {
       const email = params.get('email');
       const token = params.get('token');
 
-      if (email && token) {
+      if (tab === 'confirm-email' && email && token) {
+        this.confirmEmailDirectly(email, token);
+      } else if (email && token) {
         this.resetForm.patchValue({ email, token });
         this.resetStep.set(2);
         this.selectedTabIndex.set(2);
@@ -548,9 +781,63 @@ export class AuthComponent implements OnInit {
     this.selectedTabIndex.set(2);
   }
 
+  goToLoginWithEmail(email: string): void {
+    this.loginForm.patchValue({ email });
+    this.selectedTabIndex.set(0);
+  }
+
+  resetRegistrationView(): void {
+    this.registrationSuccessEmail.set(null);
+    this.registerForm.reset();
+  }
+
+  resendActivation(email: string): void {
+    if (!email) return;
+    this.isLoading.set(true);
+    this.authService.resendConfirmationEmail(email).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        this.snackBar.open(res.message || 'Wysłano nowy link aktywacyjny na Twój adres e-mail!', 'OK', {
+          duration: 6000
+        });
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        const msg = err?.error?.message ?? 'Nie udało się wysłać linku aktywacyjnego.';
+        this.snackBar.open(msg, 'Zamknij', { duration: 5000 });
+      }
+    });
+  }
+
+  confirmEmailDirectly(email: string, token: string): void {
+    this.isLoading.set(true);
+    this.selectedTabIndex.set(0);
+    this.authService.confirmEmail(email, token).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        this.emailConfirmedSuccess.set(true);
+        this.unconfirmedEmail.set(null);
+        this.loginForm.patchValue({ email });
+        this.snackBar.open(
+          res.message ?? 'Adres e-mail został pomyślnie potwierdzony! Możesz się teraz zalogować.',
+          'Super!',
+          { duration: 6000 }
+        );
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.unconfirmedEmail.set(email);
+        this.loginForm.patchValue({ email });
+        const msg = err?.error?.message ?? 'Link aktywacyjny jest nieprawidłowy lub wygasł.';
+        this.snackBar.open(msg, 'Zamknij', { duration: 6000 });
+      }
+    });
+  }
+
   onLogin(): void {
     if (this.loginForm.invalid) return;
     this.isLoading.set(true);
+    this.unconfirmedEmail.set(null);
     const { email, password } = this.loginForm.getRawValue();
 
     this.authService.login(email, password).subscribe({
@@ -561,6 +848,13 @@ export class AuthComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
+        if (err?.status === 403 || err?.error?.requiresEmailConfirmation) {
+          const targetEmail = err?.error?.email || email;
+          this.unconfirmedEmail.set(targetEmail);
+          const msg = err?.error?.message ?? 'Adres e-mail nie został jeszcze aktywowany. Sprawdź swoją skrzynkę pocztową.';
+          this.snackBar.open(msg, 'Zamknij', { duration: 6000 });
+          return;
+        }
         const msg = err?.error?.message ?? 'Nieprawidłowy adres e-mail lub hasło.';
         this.snackBar.open(msg, 'Zamknij', { duration: 4000 });
       }
@@ -573,12 +867,14 @@ export class AuthComponent implements OnInit {
     const { email, password, displayName } = this.registerForm.getRawValue();
 
     this.authService.register(email, password, displayName).subscribe({
-      next: () => {
+      next: (res) => {
         this.isLoading.set(false);
-        this.snackBar.open('Konto utworzone! Możesz teraz skonfigurować cele BMR/TDEE.', 'Super', {
-          duration: 3500
-        });
-        this.router.navigate(['/calculator']);
+        this.registrationSuccessEmail.set(res.email || email);
+        this.snackBar.open(
+          res.message ?? 'Konto utworzone! Wysłaliśmy link aktywacyjny na Twój adres e-mail.',
+          'Super',
+          { duration: 7000 }
+        );
       },
       error: (err) => {
         this.isLoading.set(false);

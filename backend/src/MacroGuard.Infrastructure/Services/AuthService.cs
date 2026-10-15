@@ -26,7 +26,7 @@ public class AuthService(
     ILogger<AuthService> logger,
     IEmailSender emailSender) : IAuthService
 {
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
+    public async Task<RegisterResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
         var existingUser = await userManager.FindByEmailAsync(request.Email);
         if (existingUser is not null)
@@ -39,6 +39,7 @@ public class AuthService(
             Id = Guid.NewGuid(),
             UserName = request.Email,
             Email = request.Email,
+            EmailConfirmed = false,
             DisplayName = request.DisplayName.Trim()
         };
 
@@ -71,8 +72,21 @@ public class AuthService(
         dbContext.UserProfiles.Add(defaultProfile);
         await dbContext.SaveChangesAsync(ct);
 
-        var token = GenerateJwtToken(user);
-        return new AuthResponse(token, user.Id, user.Email!, user.DisplayName);
+        // Generowanie tokena weryfikacyjnego i wysyłka wiadomości e-mail
+        var emailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var clientBaseUrl = configuration["ClientUrl"] ?? "http://localhost:4200";
+        var confirmLink = $"{clientBaseUrl}/auth?tab=confirm-email&email={Uri.EscapeDataString(user.Email!)}&token={Uri.EscapeDataString(emailToken)}";
+
+        await SendActivationEmailAsync(user, confirmLink, ct);
+
+        logger.LogInformation("Konto {Email} zostało utworzone. Wysłano wiadomość z linkiem aktywacyjnym.", user.Email);
+
+        // [VULN Fix]: Nie generujemy i nie zwracamy tokenu JWT przed weryfikacją adresu e-mail!
+        return new RegisterResponse(
+            "Konto zostało pomyślnie utworzone! Wysłaliśmy wiadomość e-mail z linkiem aktywacyjnym. Potwierdź swój adres e-mail przed pierwszym zalogowaniem.",
+            user.Email!,
+            RequiresEmailConfirmation: true
+        );
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
@@ -127,11 +141,101 @@ public class AuthService(
             throw new UnauthorizedAccessException("Nieprawidłowy adres e-mail lub hasło.");
         }
 
-        // 3. Po udanym zalogowaniu resetujemy licznik nieudanych prób
+        // 3. Po udanym zweryfikowaniu hasła resetujemy licznik nieudanych prób
         await userManager.ResetAccessFailedCountAsync(user);
+
+        // 4. Wymóg weryfikacji adresu e-mail [VULN Fix]:
+        if (!await userManager.IsEmailConfirmedAsync(user))
+        {
+            logger.LogWarning("Próba zalogowania na niepotwierdzone konto e-mail: {Email}", user.Email);
+            throw new EmailNotConfirmedException(
+                "Adres e-mail nie został jeszcze aktywowany. Sprawdź swoją skrzynkę pocztową i kliknij w link aktywacyjny.",
+                user.Email
+            );
+        }
 
         var token = GenerateJwtToken(user);
         return new AuthResponse(token, user.Id, user.Email!, user.DisplayName);
+    }
+
+    public async Task<bool> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(request.Email)
+            ?? throw new KeyNotFoundException("Nie znaleziono użytkownika o podanym adresie e-mail.");
+
+        if (user.EmailConfirmed)
+        {
+            return true;
+        }
+
+        var result = await userManager.ConfirmEmailAsync(user, request.Token);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(" ", result.Errors.Select(e => e.Description));
+            logger.LogWarning("Nieudana próba aktywacji konta {Email}: {Errors}", request.Email, errors);
+            throw new InvalidOperationException("Link aktywacyjny jest nieprawidłowy lub wygasł. Poproś o wygenerowanie nowego linku.");
+        }
+
+        logger.LogInformation("Konto {Email} zostało pomyślnie aktywowane (e-mail zweryfikowany).", user.Email);
+        return true;
+    }
+
+    public async Task<string> ResendConfirmationEmailAsync(ResendConfirmationEmailRequest request, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+        {
+            // Ochrona przed user enumeration: nie ujawniamy istnienia konta
+            return "Jeśli podany adres e-mail istnieje w bazie i nie został jeszcze aktywowany, wysłaliśmy nowy link aktywacyjny.";
+        }
+
+        if (user.EmailConfirmed)
+        {
+            return "Ten adres e-mail został już wcześniej potwierdzony. Możesz się zalogować.";
+        }
+
+        var emailToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var clientBaseUrl = configuration["ClientUrl"] ?? "http://localhost:4200";
+        var confirmLink = $"{clientBaseUrl}/auth?tab=confirm-email&email={Uri.EscapeDataString(user.Email!)}&token={Uri.EscapeDataString(emailToken)}";
+
+        await SendActivationEmailAsync(user, confirmLink, ct);
+
+        logger.LogInformation("Wysłano ponownie e-mail aktywacyjny na konto: {Email}", user.Email);
+        return "Wysłaliśmy nowy link aktywacyjny na Twój adres e-mail. Sprawdź swoją skrzynkę pocztową.";
+    }
+
+    private async Task SendActivationEmailAsync(ApplicationUser user, string confirmLink, CancellationToken ct)
+    {
+        var emailBody = $@"
+            <div style=""font-family: Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;"">
+                <div style=""text-align: center; margin-bottom: 20px;"">
+                    <h2 style=""color: #3f51b5; margin: 0;"">MacroGuard 🥗💪</h2>
+                    <p style=""color: #64748b; font-size: 14px; margin: 4px 0 0;"">Twój inteligentny dziennik żywieniowy</p>
+                </div>
+                <p>Cześć <strong>{user.DisplayName}</strong>,</p>
+                <p>Dziękujemy za rejestrację w serwisie MacroGuard!</p>
+                <p>Aby aktywować swoje konto i rozpocząć korzystanie z dziennika oraz kalkulatora makroskładników, potwierdź swój adres e-mail klikając w poniższy przycisk:</p>
+                <p style=""text-align: center; margin: 30px 0;"">
+                    <a href=""{confirmLink}"" style=""background-color: #3f51b5; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 15px;"">
+                        Potwierdź adres e-mail
+                    </a>
+                </p>
+                <p style=""color: #64748b; font-size: 13px; line-height: 1.5;"">
+                    Jeśli przycisk nie działa, skopiuj i wklej poniższy link w oknie przeglądarki:<br/>
+                    <a href=""{confirmLink}"" style=""color: #3f51b5; word-break: break-all;"">{confirmLink}</a>
+                </p>
+                <hr style=""border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;"" />
+                <p style=""color: #94a3b8; font-size: 12px; margin: 0;"">
+                    Jeśli to nie Ty zakładałeś konto w MacroGuard, zignoruj tę wiadomość.
+                </p>
+            </div>";
+
+        await emailSender.SendEmailAsync(
+            user.Email!,
+            "MacroGuard — Aktywuj swoje konto (potwierdzenie adresu e-mail)",
+            emailBody,
+            ct
+        );
     }
 
     public async Task<ForgotPasswordResponse> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default)
