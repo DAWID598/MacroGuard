@@ -719,7 +719,7 @@ export class DiaryComponent implements OnInit {
   private readonly PERSISTENT_MEALS_KEY = 'macroguard_persistent_meals';
 
   readonly allExtraMealDefinitions = [
-    { type: MealType.Snack, label: 'Przekąska', icon: 'cookie' },
+    { type: MealType.SecondBreakfast, label: 'II Śniadanie', icon: 'brunch_dining' },
     { type: MealType.AfternoonSnack, label: 'Podwieczorek', icon: 'free_breakfast' },
     { type: MealType.PreWorkout, label: 'Posiłek przedtreningowy', icon: 'bolt' },
     { type: MealType.PostWorkout, label: 'Posiłek potreningowy', icon: 'fitness_center' },
@@ -818,7 +818,7 @@ export class DiaryComponent implements OnInit {
   }
 
   isExtraMeal(type: MealType): boolean {
-    return type === MealType.Snack ||
+    return type === MealType.SecondBreakfast ||
            type === MealType.AfternoonSnack ||
            type === MealType.PreWorkout ||
            type === MealType.PostWorkout ||
@@ -968,7 +968,12 @@ export class DiaryComponent implements OnInit {
       if (raw !== null) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          return (parsed as MealType[]).filter(t => t !== MealType.SecondBreakfast);
+          return (parsed as MealType[]).filter(
+            t => t !== MealType.Breakfast &&
+                 t !== MealType.Lunch &&
+                 t !== MealType.Snack &&
+                 t !== MealType.Dinner
+          );
         }
       }
     } catch {}

@@ -26,8 +26,8 @@ public class DiaryService(MacroGuardDbContext dbContext, IProfileService profile
     private static readonly HashSet<MealType> CoreMealTypes =
     [
         MealType.Breakfast,
-        MealType.SecondBreakfast,
         MealType.Lunch,
+        MealType.Snack,
         MealType.Dinner
     ];
 

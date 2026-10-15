@@ -1,7 +1,10 @@
 using System.Threading.RateLimiting;
 using MacroGuard.Infrastructure;
 using MacroGuard.Infrastructure.Persistence;
+using MacroGuard.Infrastructure.Security;
 using Microsoft.AspNetCore.RateLimiting;
+
+EnvLoader.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 

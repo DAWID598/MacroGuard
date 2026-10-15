@@ -4,11 +4,18 @@ obj/
 .vs/
 *.user
 *.suo
+# Local configurations & secrets
+appsettings.Local.json
 appsettings.Development.Local.json
+appsettings.*.Local.json
+appsettings.Development.json
+appsettings.Production.json
+*.local.json
 .dev-jwt.key
 *.key
 .env
 .env.*
+!.env.example
 
 
 # Angular / Node

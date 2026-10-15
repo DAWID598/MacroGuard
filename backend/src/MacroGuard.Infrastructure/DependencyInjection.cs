@@ -18,8 +18,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IHostEnvironment? environment = null)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Host=localhost;Port=5432;Database=macroguard_db;Username=macroguard;Password=macroguard_dev_password";
+        var connectionString = DatabaseConnectionResolver.ResolveConnectionString(configuration, environment);
 
         services.AddDbContext<MacroGuardDbContext>(options =>
             options.UseNpgsql(connectionString));
