@@ -2,6 +2,8 @@
 ## Projekt: MacroGuard — System Zarządzania Błędami (Zgodny ze standardem ISTQB)
 
 
+| Metryka / Parametr | Wartość |
+|:---|:---|
 | **Autor:** | Dawid (Junior QA Automation Engineer) |
 | **System śledzenia defektów:** | Symulacja Jira Software / GitHub Issues |
 | **Środowisko testowe:** | Windows 10 Home 64-bit \| Google Chrome 155.0.8059.80 |
@@ -112,7 +114,7 @@ Wprowadzono modalne okno dialogowe `window.confirm` weryfikujące intencję uży
 
 ---
 
-### Raport Defektu 4: [BUG-004] Przepełnienie nagłówka posiłku i ucięcie przycisków akcji na ekranach mobilnych (Galaxy S20)
+### Raport Defektu 4: [BUG-004] Przepełnienie nagłówka posiłku i ucięcie przycisków akcji na ekranach mobilnych (Samsung Galaxy S20 Ultra)
 
 * **Identyfikator:** `BUG-004`
 * **Status:** 🟢 **CLOSED / RESOLVED** (Naprawiony i zweryfikowany poprawką CSS)

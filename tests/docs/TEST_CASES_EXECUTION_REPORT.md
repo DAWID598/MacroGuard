@@ -2,10 +2,12 @@
 ## Projekt: MacroGuard 
 
 
+| Metryka / Parametr | Wartość |
+|:---|:---|
 | **Tester odpowiedzialny:** | Dawid (Junior QA Automation Engineer) |
 | **Data wykonania:** | Październik 2026 |
 | **Środowisko:** | Windows 10 Home 64-bit \| Google Chrome 155.0.8059.80 \| Emulacja mobilna DevTools: Samsung Galaxy S20 Ultra (412x915) |
-| **Baza przypadków testowych:** | [`TEST_CASES.md`](24 przypadki testowe) |
+| **Baza przypadków testowych:** | [`TEST_CASES.md`](TEST_CASES.md) (24 przypadki testowe) |
 | **Status cyklu testowego:** | 🟢 Zakończony sukcesem (100% Zrealizowano) |
 
 ---

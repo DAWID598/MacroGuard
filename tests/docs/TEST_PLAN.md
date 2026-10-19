@@ -1,8 +1,10 @@
 # Plan Testów i Strategia Zapewnienia Jakości (Test Plan & QA Strategy)
 ## Projekt: MacroGuard — Inteligentny Dziennik Żywieniowy & Kalkulator BMR/TDEE
 
+| Metryka / Parametr | Wartość |
+|:---|:---|
 | **Autor dokumentu:** | Dawid (Junior QA Automation Engineer) |
-| **Standard dokumentacji:** | Zgodny z IEEE 829 / ISTQB |
+| **Standard dokumentacji:** | Zgodny z ISTQB (International Software Testing Qualifications Board) |
 | **Data utworzenia:** | Październik 2026 |
 | **Repozytorium:** | `MacroGuard` (Monorepo: Backend .NET 10 + Frontend Angular 19) |
 
@@ -60,8 +62,9 @@ Testowaniu podlegają wszystkie kluczowe moduły funkcjonalne i niefunkcjonalne 
    - Wyliczanie średnich tygodniowych (ISO week) oraz trendu tydzień do tygodnia.
    - Wizualizacja wykresu liniowego SVG i banera motywacyjnego.
 
-7. **Testy REST API (Backend):**
-   - Poprawność kodów odpowiedzi HTTP (200, 201, 204, 400, 401, 403, 404, 423, 429).
+7. **Testy REST API (Backend — Zakres Automatyzacji Playwright API):**
+   - Weryfikacja poprawności kodów odpowiedzi HTTP (200, 201, 204, 400, 401, 403, 404, 423, 429).
+   - Bezpośrednie testowanie endpointów backendu za pomocą klienta HTTP w Playwright (`playwright.request`) bez udziału interfejsu graficznego.
    - Weryfikacja nagłówków bezpieczeństwa i middleware Rate Limitingu (`10 req/min` na autoryzację).
 
 ---
@@ -77,51 +80,65 @@ Testowaniu podlegają wszystkie kluczowe moduły funkcjonalne i niefunkcjonalne 
 
 Jakość oprogramowania w projekcie MacroGuard weryfikowana jest na zasadzie **testowania opartego na ryzyku (Risk-Based Testing)**. Priorytety testów wynikają z potencjalnego wpływu błędu na użytkownika (Impact) oraz prawdopodobieństwa jego wystąpienia (Probability).
 
-### Macierz Oceny Ryzyka
+### 3.1. Macierz Oceny Ryzyka (Risk Assessment Matrix 2x2)
 
-```mermaid
-quadrantChart
-    title Macierz Ryzyka Funkcjonalności MacroGuard
-    x-axis "Niskie Prawdopodobieństwo Błędu" --> "Wysokie Prawdopodobieństwo Błędu"
-    y-axis "Niski Wpływ Biznesowy" --> "Krytyczny Wpływ Biznesowy"
-    quadrant-1 "P0 / P1: Priorytet Krytyczny (Automatyzacja natychmiast)"
-    quadrant-2 "P1: Wysokie Ryzyko (Dokładne testy manualne + API)"
-    quadrant-3 "P3: Drobne błędy (Testy eksploracyjne)"
-    quadrant-4 "P2: Średnie Ryzyko (Weryfikacja regresyjna)"
-    "Kalkulacje BMR / TDEE / Bilans Makro": [0.30, 0.95]
-    "Blokada Brute Force (5 prób / 5 min)": [0.45, 0.92]
-    "Aktywacja konta przez e-mail (Token)": [0.40, 0.88]
-    "Czyszczenie posiłku (delete_sweep + confirm)": [0.55, 0.82]
-    "Dodawanie i edycja gramatur w Dzienniku": [0.70, 0.90]
-    "Dynamiczny licznik w navbarze": [0.65, 0.40]
-    "Filtry kategorii produktów": [0.35, 0.45]
-    "Szablony wydruku raportów A4": [0.25, 0.35]
-    "RWD na telefonach (375px)": [0.75, 0.65]
-```
+Poniższa macierz klasyfikuje funkcjonalności aplikacji na podstawie dwóch kluczowych wymiarów: **Wpływu błędu na biznes i użytkownika (Impact)** oraz **Prawdopodobieństwa wystąpienia usterki (Probability)**:
+
+| Wpływ Biznesowy (Impact) \ Prawdopodobieństwo (Probability) | Niskie Prawdopodobieństwo Błędu (Low Probability) | Wysokie Prawdopodobieństwo Błędu (High Probability) |
+|---|---|---|
+| **Krytyczny / Wysoki Wpływ (High Impact)** | **P1 — Wysokie Ryzyko (High Risk)**<br>• Kalkulacje BMR / TDEE / Bilans Makro<br>• Blokada Brute Force (5 prób / 5 min)<br>• Aktywacja konta przez e-mail (Token)<br>👉 *Strategia:* Dokładne testy manualne + testy integracyjne API | **P0 / P1 — Ryzyko Krytyczne (Critical Risk)**<br>• Dodawanie i edycja gramatur w Dzienniku<br>• Autoryzacja i ochrona tras (`AuthGuard`)<br>• Czyszczenie i zapis posiłków<br>👉 *Strategia:* Bezwzględny priorytet automatyzacji Playwright E2E |
+| **Niski / Umiarkowany Wpływ (Low Impact)** | **P3 — Niskie Ryzyko (Low Risk)**<br>• Szablony wydruku raportów A4 / PDF<br>• Filtry kategorii produktów w oknie dodawania<br>👉 *Strategia:* Testy eksploracyjne i weryfikacja UI | **P2 — Średnie Ryzyko (Medium Risk)**<br>• Dynamiczny licznik w navbarze<br>• MacroGuard AI Coach (fallback regułowy)<br>• Ulubione zestawy dań i kopiowanie posiłków<br>👉 *Strategia:* Weryfikacja regresyjna przy wdrożeniach |
+
+### 3.2. Szczegółowa Tabela Punktacji Ryzyka (Risk Score Table)
+
+Punktacja ryzyka wyliczana jest według uznanego wzoru ISTQB: **Risk Score = Wpływ (Impact: 1–5) × Prawdopodobieństwo (Likelihood: 1–5)**:
+
+| Funkcjonalność / Moduł | Wpływ (1–5) | Prawdopodobieństwo (1–5) | Wynik Ryzyka (Score) | Priorytet Testu | Strategia / Podejście Testowe |
+|---|:---:|:---:|:---:|:---:|---|
+| **Dodawanie i edycja gramatur w Dzienniku** | 5 | 4 | **20** | `P0` | Automatyzacja Playwright E2E |
+| **Logowanie, JWT & Ochrona tras (`AuthGuard`)** | 5 | 3 | **15** | `P0` | Automatyzacja E2E + API |
+| **Kalkulacje BMR, TDEE i makroskładników** | 5 | 3 | **15** | `P0` | Automatyzacja E2E + Unit Testy |
+| **Ochrona Brute Force (blokada po 5 próbach)** | 5 | 2 | **10** | `P0` | Testy bezpieczeństwa E2E + API |
+| **Aktywacja konta przez e-mail (Mailpit)** | 4 | 2 | **8** | `P0` | Automatyzacja E2E (Mailpit API) |
+| **MacroGuard AI Coach (rekomendacje)** | 3 | 3 | **9** | `P1` | Testy manualne / integracyjne |
+| **Zapisywanie zestawów i kopiowanie dań** | 3 | 3 | **9** | `P1` | Automatyzacja Playwright E2E |
+| **Dynamiczny licznik posiłków w navbarze** | 2 | 4 | **8** | `P2` | Weryfikacja regresyjna UI |
+| **Filtry i wyszukiwarka produktów** | 2 | 2 | **4** | `P2` | Testy manualne eksploracyjne |
+| **Szablony wydruku raportów okresowych A4** | 2 | 1 | **2** | `P2` | Weryfikacja wizualna / Print preview |
 
 ---
 
 ## 4. Techniki Projektowania Testów (Test Design Techniques)
 
-Do przygotowania scenariuszy testowych w `TEST_CASES.md` wykorzystano 4 fundamentalne techniki czarnoskrzynkowe (zgodne z sylabusem ISTQB):
+Do przygotowania scenariuszy testowych w `TEST_CASES.md` wykorzystano 4 fundamentalne techniki czarnoskrzynkowe (zgodne z sylabusem ISTQB). Poniższe punkty prezentują **reprezentatywne przykłady metodologii**, na bazie których opracowano pełną bazę przypadków testowych:
 
 ### 4.1. Podział na Klasy Równoważności (Equivalence Partitioning - EP)
-Dzielimy dane wejściowe na grupy, dla których aplikacja powinna zachować się identycznie:
-* **Hasło użytkownika:**
+Dzielimy dane wejściowe na grupy (klasy poprawne i niepoprawne), dla których aplikacja powinna zachować się w jednakowy sposób. Reprezentatywne przykłady podziału w projekcie:
+* **Hasło użytkownika (walidacja złożoności):**
   - *Klasa Poprawna (KP1):* Hasło $\ge$ 10 znaków, min. 1 wielka litera, 1 mała, 1 cyfra, 1 znak specjalny (np. `MacroGuard2026!`).
   - *Klasa Niepoprawna (KN1):* Długość $< 10$ znaków (np. `Ab1!cde`).
   - *Klasa Niepoprawna (KN2):* Brak wielkiej litery (np. `macroguard2026!`).
   - *Klasa Niepoprawna (KN3):* Brak cyfry (np. `MacroGuardSecret!`).
   - *Klasa Niepoprawna (KN4):* Brak znaku specjalnego (np. `MacroGuard2026Pass`).
-* **Waga produktu (gramy):**
-  - *Klasa Poprawna:* $1 \le x \le 5000$ g.
-  - *Klasa Niepoprawna:* $x \le 0$ lub wartości nienumeryczne.
+* **Waga porcji produktu (gramatura w Dzienniku):**
+  - *Klasa Poprawna (KP1):* $1 \le x \le 5000$ g (wartości fizjologiczne porcji).
+  - *Klasa Niepoprawna (KN1):* $x \le 0$ (wartości ujemne lub zero).
+  - *Klasa Niepoprawna (KN2):* $x > 5000$ g (wartości nierealistyczne / overflow).
+  - *Klasa Niepoprawna (KN3):* Wartości nieliczbowe (np. tekst, symbole).
 
 ### 4.2. Analiza Wartości Brzegowych (Boundary Value Analysis - BVA)
-Testowanie wartości na granicach klas równoważności:
-* Długość hasła: $9$ znaków (Odrzucenie), $10$ znaków (Akceptacja), $11$ znaków (Akceptacja).
-* Deficyt kaloryczny redukcji: $5\%$ (dopuszczalny min.), $25\%$ (rekomendowany max.), $30\%$ (ostrzeżenie o zbyt agresywnej redukcji).
-* Kalorie posiłku poniżej BMR: $BMR - 1$ kcal (wyświetlenie ostrzeżenia medycznego).
+Testowanie wartości leżących dokładnie na krawędziach klas równoważności (tam statystycznie programiści popełniają najwięcej błędów typu *off-by-one*). Reprezentatywne przykłady w projekcie:
+* **Długość hasła rejestracji:**
+  - $9$ znaków $\rightarrow$ Wartość tuż poniżej granicy (Oczekiwane: Odrzucenie / Przycisk zablokowany).
+  - $10$ znaków $\rightarrow$ Dokładna granica minimalna (Oczekiwane: Akceptacja).
+  - $11$ znaków $\rightarrow$ Wartość tuż powyżej granicy (Oczekiwane: Akceptacja).
+* **Deficyt kaloryczny w redukcji:**
+  - $5\%$ $\rightarrow$ Minimalny dopuszczalny deficyt.
+  - $25\%$ $\rightarrow$ Górny zalecany limit bezpiecznej redukcji.
+  - $30\%$ $\rightarrow$ Przekroczenie progu bezpieczeństwa (Oczekiwane: Alert o zbyt agresywnej diecie).
+* **Próg kalorii poniżej BMR:**
+  - $BMR + 0$ kcal $\rightarrow$ Bilans równy BMR (Bezpieczny).
+  - $BMR - 1$ kcal $\rightarrow$ Dokładne przekroczenie granicy (Oczekiwane: Natychmiastowe wyświetlenie banera medycznego).
 
 ### 4.3. Testowanie Przejść Między Stanami (State Transition Testing)
 Weryfikacja cyklu życia encji w systemie:
@@ -131,7 +148,40 @@ Weryfikacja cyklu życia encji w systemie:
   `Konto aktywne` $\xrightarrow{\text{1-4 błędne hasła}}$ `Ostrzeżenie o pozostałych próbach` $\xrightarrow{\text{5. błędne hasło}}$ `Stan: Zablokowane (Lockout 5 min / HTTP 423)` $\xrightarrow{\text{Upływ 5 min lub reset hasła}}$ `Stan: Odblokowane`.
 
 ### 4.4. Tablice Decyzyjne (Decision Tables)
-Stosowane przy wyliczaniu celów kalorycznych w zależności od kombinacji: *Płeć + Poziom aktywności fizycznej + Cel (Redukcja / Utrzymanie / Masa)*.
+
+Tablice decyzyjne stosowane są do testowania złożonych kombinacji reguł biznesowych oraz powiązań między warunkami wejściowymi a akcjami systemu. W MacroGuard tablice decyzyjne weryfikują m.in. kalkulator zapotrzebowania z ostrzeżeniami medycznymi oraz politykę bezpieczeństwa logowania:
+
+#### Tablica Decyzyjna 1: Kalkulator BMR/TDEE & Dynamiczne Reguły Ostrzeżeń
+
+| Element Tablicy | R1 (Mężczyzna - Utrzymanie) | R2 (Mężczyzna - Redukcja standard) | R3 (Kobieta - Agresywny deficyt) | R4 (Mężczyzna - Budowa masy) | R5 (Praca fizyczna - Redukcja) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **WARUNKI (Conditions):** | | | | | |
+| **C1:** Płeć użytkownika | Mężczyzna | Mężczyzna | Kobieta | Mężczyzna | Dowolna |
+| **C2:** Poziom aktywności (PAL) | Siedzący (1.2) | Umiarkowany (1.55) | Lekki (1.375) | Wysoki (1.725) | Praca fizyczna (1.6) |
+| **C3:** Cel sylwetkowy | Utrzymanie (0%) | Redukcja (-15%) | Redukcja (-35%) | Masa (+10%) | Redukcja (-20%) |
+| **C4:** Czy kalorie docelowe < BMR? | NIE | NIE | **TAK** | NIE | NIE |
+| **AKCJE / WYNIK (Actions):** | | | | | |
+| **A1:** Formuła BMR Mifflina | $+5$ kcal | $+5$ kcal | $-161$ kcal | $+5$ kcal | $+5$ / $-161$ kcal |
+| **A2:** Wyliczenie TDEE | $BMR \times 1.2$ | $BMR \times 1.55$ | $BMR \times 1.375$ | $BMR \times 1.725$ | $BMR \times 1.6$ |
+| **A3:** Docelowe kalorie | $TDEE$ | $TDEE \times 0.85$ | $TDEE \times 0.65$ | $TDEE \times 1.10$ | $TDEE \times 0.80$ |
+| **A4:** Baner ostrzeżenia medycznego (< BMR) | ❌ Ukryty | ❌ Ukryty | ⚠️ **WYŚWIETLONY** | ❌ Ukryty | ❌ Ukryty |
+| **A5:** Boks info o treningu oporowym | ❌ Ukryty | ❌ Ukryty | ❌ Ukryty | 🏋️ **WYŚWIETLONY** | ❌ Ukryty |
+| **A6:** Zapis profilu w bazie | Sukces | Sukces | Sukces (z ostrzeżeniem) | Sukces | Sukces |
+
+#### Tablica Decyzyjna 2: Logowanie i Blokada Anty-Brute Force
+
+| Element Tablicy | R1 (Sukces) | R2 (Błędne hasło 1–3) | R3 (Ostatnia szansa) | R4 (Blokada konta) | R5 (Brak aktywacji) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **WARUNKI (Conditions):** | | | | | |
+| **C1:** Poprawny adres e-mail | TAK | TAK | TAK | TAK | TAK |
+| **C2:** E-mail potwierdzony (`EmailConfirmed`) | TAK | TAK | TAK | TAK | **NIE** |
+| **C3:** Poprawne hasło | TAK | NIE | NIE | Dowolne | Dowolne |
+| **C4:** Licznik błędnych prób | 0 | 1 – 3 | 4 | $\ge 5$ (w oknie 5 min) | Dowolny |
+| **AKCJE / WYNIK (Actions):** | | | | | |
+| **A1:** Wydanie tokena JWT i logowanie | ✅ TAK (HTTP 200) | ❌ NIE | ❌ NIE | ❌ NIE | ❌ NIE |
+| **A2:** Komunikat błędu w UI | Brak | "Nieprawidłowe dane" | "Ostatnia szansa przed blokadą" | "Konto zablokowane na 5 minut" | "Potwierdź adres e-mail" |
+| **A3:** Kod odpowiedzi HTTP | `200 OK` | `400 Bad Request` | `400 Bad Request` | `423 Locked` | `403 Forbidden` |
+| **A4:** Inkrementacja licznika prób | Reset do 0 | $+1$ | $+1$ (osiągnięto 5) | Brak (zablokowane) | Brak zmian |
 
 ---
 

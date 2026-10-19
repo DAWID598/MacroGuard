@@ -2,9 +2,11 @@
 ## Projekt: MacroGuard — Dziennik Żywieniowy & Kalkulator BMR/TDEE
 
 
+| Metryka / Parametr | Wartość |
+|:---|:---|
 | **Autor dokumentu:** | Dawid (Junior QA Automation Engineer) |
 | **Łączna liczba przypadków:** | 24 przypadki testowe (P0: 5, P1: 16, P2: 3, P3: 0) |
-| **Kwalifikacja do automatyzacji:** | 20 przypadków dedykowanych do automatyzacji |
+| **Kwalifikacja do automatyzacji:** | 20 przypadków dedykowanych do automatyzacji (Playwright) |
 
 ---
 
