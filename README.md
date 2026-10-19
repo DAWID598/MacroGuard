@@ -1,13 +1,5 @@
 # MacroGuard 🥑
 
-[![Unit Tests](https://img.shields.io/badge/Unit%20Tests-32%2F32%20PASS%20(100%25)-brightgreen?style=flat-square&logo=dotnet)](backend/tests/MacroGuard.UnitTests)
-[![API Integration Tests](https://img.shields.io/badge/API%20Integration%20Tests-17%2F17%20PASS%20(100%25)-brightgreen?style=flat-square&logo=playwright)](tests/api)
-[![E2E Tests](https://img.shields.io/badge/E2E%20Tests-8%2F8%20PASS%20(100%25)-brightgreen?style=flat-square&logo=playwright)](tests/e2e)
-[![Manual Tests](https://img.shields.io/badge/Manual%20Tests-24%2F24%20PASS%20(100%25)-brightgreen?style=flat-square&logo=checkmarx)](tests/docs/TEST_CASES_EXECUTION_REPORT.md)
-[![QA Standards](https://img.shields.io/badge/QA%20Standard-ISTQB%20Compliant-blue?style=flat-square)](tests/docs/TEST_PLAN.md)
-[![Defects](https://img.shields.io/badge/Defects-5%20Closed%20%2F%20Resolved-success?style=flat-square)](tests/docs/BUG_REPORTS.md)
-[![Automation](https://img.shields.io/badge/Automation-Playwright%20%7C%20TypeScript-orange?style=flat-square)](tests/)
-
 Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / Węglowodany), wyliczania zapotrzebowania kalorycznego (**BMR / TDEE** wg wzoru Mifflin-St Jeor), prowadzenia dziennika żywieniowego z podziałem na **4 posiłki** (*Śniadanie, Obiad, Przekąska, Kolacja*) oraz **inteligentnego generatora przepisów AI** (*„Nie masz pomysłu? Wygeneruj posiłek”*).
 
 ## Technologie:
