@@ -5,4 +5,7 @@
     <Project Path="src/MacroGuard.Domain/MacroGuard.Domain.csproj" />
     <Project Path="src/MacroGuard.Infrastructure/MacroGuard.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MacroGuard.UnitTests/MacroGuard.UnitTests.csproj" />
+  </Folder>
 </Solution>

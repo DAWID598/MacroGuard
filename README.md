@@ -1,5 +1,6 @@
 # MacroGuard 🥑
 
+[![Unit Tests](https://img.shields.io/badge/Unit%20Tests-32%2F32%20PASS%20(100%25)-brightgreen?style=flat-square&logo=dotnet)](backend/tests/MacroGuard.UnitTests)
 [![Manual Tests](https://img.shields.io/badge/Manual%20Tests-24%2F24%20PASS%20(100%25)-brightgreen?style=flat-square&logo=checkmarx)](tests/docs/TEST_CASES_EXECUTION_REPORT.md)
 [![QA Standards](https://img.shields.io/badge/QA%20Standard-ISTQB%20Compliant-blue?style=flat-square)](tests/docs/TEST_PLAN.md)
 [![Defects](https://img.shields.io/badge/Defects-5%20Closed%20%2F%20Resolved-success?style=flat-square)](tests/docs/BUG_REPORTS.md)
@@ -145,15 +146,18 @@ Aplikacja została objęta kompleksowym procesem zapewnienia jakości (**Quality
 
 ### 📊 Metryki Jakościowe (Stan na Październik 2026)
 
-* **Łączna liczba przypadków testowych:** `24`
+* **🟩 Automatyczne Testy Jednostkowe (.NET 10 / xUnit):** **`32 / 32 PASS (100%)`** w czasie **`~0.1 s`**
+  * `BmrCalculatorTests`: 14 testów (Mifflin-St Jeor dla M/K, współczynniki PAL, cel redukcji/masy, flaga `IsBelowBmr`)
+  * `MealEntryNutritionTests`: 8 testów (przeliczanie porcji w gramach i płynów w mililitrach, zaokrąglanie, ochrona przed null)
+  * `ValidationAttributesTests`: 10 testów (odrzucenie ujemnych gramatur `BUG-005`, BVA 1g/5000g, polityka haseł `TC-AUTH-002`)
+* **📋 Testy Manualne (ISTQB):** **`24 / 24 PASS (100% zaliczenia)`**
   * 🔴 **Krytyczne (P0 Smoke):** `5 / 5 (100% PASS)`
   * 🟡 **Biznesowe (P1 Functional):** `16 / 16 (100% PASS)`
   * 🔵 **Normalne (P2 Regresja):** `3 / 3 (100% PASS)`
-* **Skuteczność wykonania testów:** **100% (24 / 24 zaliczone pomyślnie, 0 defektów blokujących)**
 * **Wykryte i naprawione defekty:** `5` (wszystkie zweryfikowane w re-testach i zamknięte)
 * **Środowisko testów manualnych:** Windows 10 Home 64-bit | Google Chrome 155.0 (Desktop 1920x1080) | Emulacja mobilna DevTools: Samsung Galaxy S20 Ultra (412x915)
 
-### 🚀 Następny krok: Automatyzacja Testów & CI/CD
+### 🚀 Następny krok: Automatyzacja E2E & CI/CD
 Przygotowano podwaliny pod kompleksowy zestaw testów automatycznych:
 * **Framework:** Playwright + TypeScript
 * **Architektura testów:** Page Object Model (POM)
@@ -164,21 +168,30 @@ Przygotowano podwaliny pod kompleksowy zestaw testów automatycznych:
 
 ## Szybki Start
 
-### 1. Uruchom usługi Docker (PostgreSQL 17 + serwer pocztowy Mailpit)
+### 1. Skonfiguruj plik środowiskowy (`.env`)
+Plik `.env` zawiera poświadczenia do bazy danych i ze względów bezpieczeństwa nie jest commitowany do repozytorium.
+
+1. Skopiuj szablon przygotowany w projekcie:
+```powershell
+cp .env.example .env
+```
+2. Otwórz utworzony plik `.env` i w polu `POSTGRES_PASSWORD` **ustal własne hasło do bazy danych** (np. `POSTGRES_PASSWORD=twoje_bezpieczne_haslo`). Wartości `POSTGRES_USER=macroguard` oraz `POSTGRES_DB=macroguard_db` pozostaw bez zmian.
+
+### 2. Uruchom usługi Docker (PostgreSQL 17 + serwer pocztowy Mailpit)
 Upewnij się, że aplikacja **Docker Desktop** jest włączona, a następnie w głównym katalogu uruchom:
 ```powershell
 docker compose up -d
 ```
 > Lokalna skrzynka pocztowa **Mailpit** jest dostępna w przeglądarce pod adresem: `http://localhost:8025`. Trafiają tam wszystkie e-maile z resetem hasła wysyłane przez aplikację — **działa od strzała dla każdego bez konfiguracji**!
 
-### 2. Uruchom Backend (.NET 10 API)
+### 3. Uruchom Backend (.NET 10 API)
 Przy pierwszym uruchomieniu API automatycznie utworzy tabele w bazie PostgreSQL i wypełni bazę 75+ popularnymi produktami spożywczymi (mięsa, ryby, nabiał, warzywa, owoce, orzechy oraz tłuszcze i oleje):
 ```powershell
 dotnet run --project backend/src/MacroGuard.Api
 ```
 Backend nasłuchuje pod adresem: `http://localhost:5000`
 
-### 3. Uruchom Frontend (Angular + Angular Material)
+### 4. Uruchom Frontend (Angular + Angular Material)
 Przejdź do folderu `frontend`, zainstaluj zależności (przy pierwszym uruchomieniu po sklonowaniu repozytorium) i wystartuj serwer deweloperski:
 
 ```bash
@@ -193,4 +206,10 @@ npm --prefix frontend start
 ```
 
 Aplikacja będzie dostępna w przeglądarce pod adresem: `http://localhost:4200`
+
+### 5. Uruchom Testy Jednostkowe (.NET 10 / xUnit)
+Wszystkie 32 testy jednostkowe uruchomisz jednym poleceniem z poziomu głównego katalogu:
+```powershell
+dotnet test backend/tests/MacroGuard.UnitTests/MacroGuard.UnitTests.csproj
+```
 

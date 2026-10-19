@@ -118,9 +118,35 @@ pie title Status Wykonania Testów (24 przypadki - 100%)
 
 ---
 
-## 3. Wnioski i Decyzja o Wydaniu (Release Sign-Off)
+## 3. Raport z Wykonania Automatycznych Testów Jednostkowych (.NET 10 / xUnit)
 
-* **Wynik cyklu testowego:** **24 / 24 przypadki testowe zaliczone (100% PASS)**.
+| Projekt testowy | Framework & Biblioteki | Liczba testów | Status | Czas wykonania |
+|---|---|:---:|:---:|:---:|
+| `backend/tests/MacroGuard.UnitTests` | .NET 10 + xUnit 2.9 + FluentAssertions 8.0 | **32 / 32** | 🟢 **100% PASS** | **106 ms** |
+
+### Podsumowanie klas testowych:
+1. **`BmrCalculatorTests.cs` (14 testów 🟢 PASS):**
+   - Pełna zgodność ze wzorem Mifflin-St Jeor dla profilu męskiego (`TC-CALC-001`: BMR 1805 kcal, TDEE 2798 kcal, cel redukcji -15% = 2378 kcal, białko 160g).
+   - Obliczenia dla kobiet z ujemnym offsetem `-161 kcal`.
+   - Dynamiczne wykrywanie agresywnego deficytu poniżej BMR (`TC-CALC-002`: flaga `IsBelowBmr = true`).
+   - Weryfikacja mnożnika pracy fizycznej (`PAL = 1.6`) oraz testy parametryczne `[Theory]` dla wszystkich 6 poziomów współczynnika aktywności.
+   - Wyliczanie szacowanego czasu osiągnięcia wagi docelowej w tygodniach (`EstimatedWeeks`).
+2. **`MealEntryNutritionTests.cs` (8 testów 🟢 PASS):**
+   - Matematyka skalowania wartości odżywczych porcji 150g jajka z bazy (`TC-DIARY-001`: 214.5 kcal, B: 18.9g, W: 1.05g, T: 14.25g).
+   - Przeliczanie objętości płynów w mililitrach (`TC-DIARY-002`: puszka Coca-Coli 330 ml ➔ 138.6 kcal, W: 35.0g).
+   - Ochrona przed `NullReferenceException` dla pustych referencji produktu.
+3. **`ValidationAttributesTests.cs` (10 testów 🟢 PASS):**
+   - **Regresyjna weryfikacja naprawionego defektu `BUG-005`**: bezwzględne odrzucanie gramatur $\le 0$ g (`-100g`, `-1g`, `0g`).
+   - Analiza wartości brzegowych (BVA): akceptacja dopuszczalnych granic `1g` i `5000g`, odrzucenie `5001g`.
+   - Złożoność hasła (`TC-AUTH-002`): testy klas równoważności EP (odrzucenie hasła 9-znakowego, brak małej/wielkiej litery, brak cyfry, brak znaku specjalnego) oraz pomyślna akceptacja hasła `MacroGuard2026!`.
+
+---
+
+## 4. Wnioski i Decyzja o Wydaniu (Release Sign-Off)
+
+* **Testy manualne (ISTQB):** **24 / 24 przypadki testowe zaliczone (100% PASS)**.
+* **Testy jednostkowe (.NET 10 / xUnit):** **32 / 32 testy zaliczone (100% PASS, 106 ms)**.
 * **Krytyczne błędy blokujące (P0):** **0**.
+* **Decyzja:** 🟢 **Wydanie zatwierdzone (Release Approved)** — podstawa piramidy testów i kluczowe reguły biznesowe w pełni zabezpieczone automatycznie.
 
 

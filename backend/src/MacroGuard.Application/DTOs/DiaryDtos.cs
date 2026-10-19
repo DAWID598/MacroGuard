@@ -40,10 +40,10 @@ public record DailyDiaryDto(
 );
 
 public record AddMealEntryRequest(
-    [Required] Guid FoodItemId,
-    [Required] DateOnly ConsumedDate,
-    [Required] MealType MealType,
-    [Range(1, 5000)] decimal WeightGrams
+    [property: Required] Guid FoodItemId,
+    [property: Required] DateOnly ConsumedDate,
+    [property: Required] MealType MealType,
+    [property: Range(1, 5000)] decimal WeightGrams
 );
 
 public record CopyMealRequest(

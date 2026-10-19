@@ -106,6 +106,23 @@ Punktacja ryzyka wyliczana jest według uznanego wzoru ISTQB: **Risk Score = Wp�
 | **Filtry i wyszukiwarka produktów** | 2 | 2 | **4** | `P2` | Testy manualne eksploracyjne |
 | **Szablony wydruku raportów okresowych A4** | 2 | 1 | **2** | `P2` | Weryfikacja wizualna / Print preview |
 
+### 3.3. Architektura Piramidy Testów (Test Pyramid Architecture)
+
+Zgodnie z uznanymi praktykami inżynierii oprogramowania (Mike Cohn / Martin Fowler), strategia testów w projekcie MacroGuard opiera się na 3-warstwowej **Piramidzie Testów**:
+
+```mermaid
+flowchart TD
+    E2E["🔺 SZCZYT: E2E UI (Playwright + POM)<br><b>8 testów</b><br><i>Kluczowe ścieżki użytkownika, Smoke testy, interakcje UI</i>"]
+    INT["🔷 ŚRODEK: Integracyjne / API (Playwright API / REST)<br><b>12 testów</b><br><i>Endpointy REST API, kody HTTP, baza PostgreSQL, Brute Force</i>"]
+    UNIT["🟩 PODSTAWA: Jednostkowe (.NET 10 / xUnit + FluentAssertions)<br><b>32 testy</b> (wykonanie: ~0.1 s)<br><i>Algorytm BMR/TDEE (Mifflin), przeliczanie makroskładników, walidatory BUG-005</i>"]
+
+    E2E --> INT --> UNIT
+```
+
+* **🟩 Warstwa 1 — Podstawa: Testy Jednostkowe (.NET 10 / xUnit):** Zlokalizowane w projekcie `backend/tests/MacroGuard.UnitTests`. Błyskawicznie weryfikują formuły matematyczne kalkulatora BMR/TDEE, przeliczanie gramatur i objętości napojów oraz reguły walidacji (32 testy, czas wykonania: ~106 ms).
+* **🔷 Warstwa 2 — Środek: Testy Integracyjne / API (12 testów):** Weryfikacja kontraktów REST API, kodów błędów (403, 423 Locked), tokenów i operacji bazodanowych.
+* **🔺 Warstwa 3 — Szczyt: Testy E2E (8 testów):** Testy krytycznych ścieżek użytkownika (Core Flows) w przeglądarce w oparciu o Playwright i wzorzec Page Object Model (POM).
+
 ---
 
 ## 4. Techniki Projektowania Testów (Test Design Techniques)
@@ -195,6 +212,7 @@ Testy realizowane są w wyizolowanym środowisku kontenerowo-lokalnym odpowiadaj
 | **Serwer pocztowy (Dev/Test)** | Mailpit (Docker) | SMTP port `1025`, Web UI port `8025` (podgląd e-maili) |
 | **Backend API** | .NET 10 ASP.NET Core Web API | Port `5000` (`http://localhost:5000/api`) |
 | **Frontend SPA** | Angular 19 + Angular Material | Port `4200` (`http://localhost:4200`) |
+| **Testy Jednostkowe (Unit)** | xUnit 2.9 + FluentAssertions 8.0 (.NET 10) | Projekt `backend/tests/MacroGuard.UnitTests` (32 testy, wykonanie: ~106 ms) |
 | **Narzędzie do testów E2E** | Playwright / TypeScript | Tryb *headed* (lokalnie) oraz *headless* (CI) |
 | **Narzędzie do testów API** | Playwright API / REST Client | Bezpośrednie wywołania endpointów HTTP |
 | **Docelowa kompatybilność (Cross-Browser)** | Silniki Chromium (Google Chrome, Edge), Firefox, WebKit (Safari) | Desktop (1920x1080) + Mobile Viewport (412x915) |

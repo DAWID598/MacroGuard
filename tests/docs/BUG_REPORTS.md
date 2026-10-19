@@ -172,4 +172,7 @@ Aplikacja dodawała wpis z ujemną wartością kalorii (np. `-143 kcal`), co pow
 Pole gramatury musi posiadać walidację `min="1"` na poziomie formularza HTML/Angular oraz restrykcyjną walidację w backendzie (`RuleFor(x => x.Grams).GreaterThan(0)`). Przycisk dodania powinien być zablokowany przy gramaturze $\le 0$.
 
 #### Przyczyna źródłowa & Rozwiązanie:
-Wdrożono walidator FluentValidation w backendzie odrzucający gramatury $\le 0$ kodem HTTP `400 Bad Request` oraz dodano `Validators.min(1)` w formularzu reaktywnym frontendu.
+Wdrożono walidację `[property: Range(1, 5000)]` w backendzie odrzucającą gramatury $\le 0$ oraz dodano `Validators.min(1)` w formularzu reaktywnym frontendu.
+
+#### Weryfikacja automatyczna (Automated Regression Suite):
+Zaimplementowano zautomatyzowane testy jednostkowe w `backend/tests/MacroGuard.UnitTests/ValidationAttributesTests.cs` (metoda `AddMealEntryRequest_NegativeOrZeroGrams_FailsValidationAccordingToBug005` oraz analiza wartości brzegowych BVA: 1g, 5000g i 5001g), trwale chroniące aplikację przed powrotem defektu w przyszłości.
