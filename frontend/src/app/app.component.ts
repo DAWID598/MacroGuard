@@ -117,7 +117,35 @@ import { DiaryStateService } from './core/services/diary-state.service';
       }
     }
 
-    @media (max-width: 720px) {
+    @media (max-width: 900px) {
+      .top-nav {
+        height: auto !important;
+        padding: 6px 12px !important;
+      }
+
+      .nav-inner {
+        flex-wrap: wrap;
+        gap: 6px 12px;
+      }
+
+      .nav-links {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        a {
+          flex-shrink: 0;
+          font-size: 13px;
+          padding: 0 10px;
+        }
+      }
+
       .user-greeting {
         display: none;
       }

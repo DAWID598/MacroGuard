@@ -599,7 +599,13 @@ import { ReportDialogComponent } from './report-dialog.component';
         display: flex;
         align-items: center;
         gap: 6px;
-        flex-shrink: 0;
+        flex-wrap: wrap;
+
+        @media (max-width: 520px) {
+          justify-content: flex-start;
+          width: 100%;
+          margin-top: 4px;
+        }
       }
 
       .ai-meal-btn {
