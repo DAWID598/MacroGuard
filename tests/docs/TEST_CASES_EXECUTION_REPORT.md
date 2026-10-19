@@ -15,9 +15,20 @@
 ## 1. Podsumowanie Wyników (Execution Metrics)
 
 ```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'pie1': '#16a34a',
+    'pie2': '#dc2626',
+    'pie3': '#f59e0b',
+    'pieSectionTextColor': '#ffffff',
+    'pieLegendTextColor': '#e2e8f0',
+    'pieTitleTextColor': '#f8fafc'
+  }
+}}%%
 pie title Status Wykonania Testów (24 przypadki - 100%)
     "Zaliczone (PASS)" : 24
-    "Oblewające (FAIL)" : 0
+    "Niezaliczone (FAIL)" : 0
     "Do wykonania / W toku" : 0
 ```
 
@@ -61,9 +72,9 @@ pie title Status Wykonania Testów (24 przypadki - 100%)
 
 | ID | Tytuł przypadku testowego | Priorytet | Status | Data & Tester | Rzeczywisty wynik i uwagi |
 |---|---|---|---|---|---|
-| `TC-DIARY-001` | Dodanie produktu z bazy do posiłku i aktualizacja sumy makro | `P0` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Po dodaniu 150g 'Jajko kurze całe (1 szt. ~ 55g) (Wiejskie)' posiłek i podsumowanie dnia poprawnie zaktualizowały się do 215 kcal (B: 18.9g, W: 1.0g, T: 14.2g). Wyświetlił się toast sukcesu. |
+| `TC-DIARY-001` | Dodanie produktu z bazy do posiłku i aktualizacja sumy makro | `P0` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Po dodaniu 150g 'Jajko kurze całe (1 szt. ~ 55g) (Wiejskie)' posiłek i podsumowanie dnia poprawnie zaktualizowały się do 215 kcal (B: 18.9g, W: 1.0g, T: 14.2g). Wyświetliło się powiadomienie o sukcesie (Snackbar). |
 | `TC-DIARY-002` | Dodanie napoju z wyborem objętości w mililitrach (ml) | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Po wybraniu napoju jednostka przełącza się na ml z kafelkami szybkiego wyboru (150, 250, 330, 500 ml). Wybór 330 ml przelicza 138.6 kcal, a podsumowanie posiłku zaokrągla wartość do 139 kcal. |
-| `TC-DIARY-003` | Usunięcie pojedynczej pozycji z posiłku | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Kliknięcie ikony kosza natychmiast usuwa pozycję z posiłku, odejmuje jej kalorie i makroskładniki z bilansu dnia oraz wyświetla toast potwierdzający. |
+| `TC-DIARY-003` | Usunięcie pojedynczej pozycji z posiłku | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Kliknięcie ikony kosza natychmiast usuwa pozycję z posiłku, odejmuje jej kalorie i makroskładniki z bilansu dnia oraz wyświetla powiadomienie o usunięciu (Snackbar). |
 | `TC-DIARY-004` | Wyczyszczenie wszystkich pozycji z posiłku („Wyczyść wszystkie pozycje...”) | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Po kliknięciu przycisku 'Wyczyść wszystkie pozycje z tego posiłku' pojawia się modal z pytaniem i liczbą pozycji. Po zatwierdzeniu (OK) wszystkie pozycje zostają skasowane, a kalorie wyzerowane. |
 | `TC-DIARY-005` | Anulowanie wyczyszczenia posiłku (`confirm` -> Anuluj) | `P2` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Kliknięcie 'Anuluj' w oknie dialogowym zamyka okno bez wysyłania żądania usunięcia – pozycje w posiłku pozostają w 100% nienaruszone. |
 | `TC-DIARY-006` | Dodanie opcjonalnego posiłku i dynamiczny licznik w menu | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Dodanie 'II Śniadanie' wstawia kartę w porządku chronologicznym, a etykieta w navbarze natychmiast reaktywnie aktualizuje się na 'Dziennik (5 posiłków)'. |
@@ -75,7 +86,7 @@ pie title Status Wykonania Testów (24 przypadki - 100%)
 
 | ID | Tytuł przypadku testowego | Priorytet | Status | Data & Tester | Rzeczywisty wynik i uwagi |
 |---|---|---|---|---|---|
-| `TC-FOOD-001` | Wyszukiwanie produktów z filtrowaniem po kategoriach | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Po wybraniu kategorii 'Tłuszcze i Oleje' i wpisaniu 'Oliwa' wyniki precyzyjnie filtrują się tylko do produktów z tej kategorii (np. Oliwa z oliwek Extra Virgin). |
+| `TC-FOOD-001` | Wyszukiwanie produktów z filtrowaniem po kategoriach | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Po wybraniu kategorii 'Tłuszcze i Oleje' i wpisaniu 'Oliwa' wyniki precyzyjnie filtrują się tylko do produktów z tej kategorii. |
 | `TC-FOOD-002` | Utworzenie własnego produktu spożywczego | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Utworzenie produktu 'Baton proteinowy karmelowy' w kategorii 'Odżywki i Przekąski' z makro (380 kcal, 32B/28W/12T) zapisuje się w bazie i produkt jest natychmiast wyszukiwalny. |
 
 ---
@@ -103,7 +114,7 @@ pie title Status Wykonania Testów (24 przypadki - 100%)
 | ID | Tytuł przypadku testowego | Priorytet | Status | Data & Tester | Rzeczywisty wynik i uwagi |
 |---|---|---|---|---|---|
 | `TC-REP-001` | Wygenerowanie raportu okresowego (7 / 30 dni) i eksport do druku/PDF | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym. Modal agreguje dane tygodniowe i miesięczne, przelicza kafelki KPI, tabelę dzienną oraz wywołuje systemowe okno druku/zapisu do PDF. |
-| `TC-COACH-001` | Generowanie analizy postępów i rekomendacji przez MacroGuard AI Coach | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym w 100%. Generowanie raportu trenera AI zwraca kompleksową analizę: werdykt, bilans kalorii, wskaźnik białka, trend wagi oraz trafne rekomendacje dietetyczne. Toast potwierdza wygenerowanie. |
+| `TC-COACH-001` | Generowanie analizy postępów i rekomendacji przez MacroGuard AI Coach | `P1` | 🟢 PASS | 19.10.2026 \| Dawid | Zgodny z oczekiwanym w 100%. Generowanie raportu trenera AI zwraca kompleksową analizę: werdykt, bilans kalorii, wskaźnik białka, trend wagi oraz trafne rekomendacje dietetyczne. Powiadomienie w aplikacji (Snackbar) potwierdza pomyślne wygenerowanie. |
 
 ---
 

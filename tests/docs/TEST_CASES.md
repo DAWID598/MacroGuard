@@ -1,4 +1,4 @@
-# Macierz Przypadków Testowych (Test Cases Specification)
+# Spis Przypadków Testowych (Test Cases Specification)
 ## Projekt: MacroGuard — Dziennik Żywieniowy & Kalkulator BMR/TDEE
 
 
