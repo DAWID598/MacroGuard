@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using FluentAssertions;
 using MacroGuard.Application.DTOs;
 using MacroGuard.Domain.Enums;
@@ -17,8 +18,33 @@ public class ValidationAttributesTests
     private static IList<ValidationResult> ValidateModel(object model)
     {
         var validationResults = new List<ValidationResult>();
-        var ctx = new ValidationContext(model, serviceProvider: null, items: null);
+        var type = model.GetType();
+
+        // 1. Sprawdź właściwości
+        var ctx = new ValidationContext(model);
         Validator.TryValidateObject(model, ctx, validationResults, validateAllProperties: true);
+
+        // 2. Dla rekordów z atrybutami na parametrach konstruktora (ASP.NET Core Model Binding)
+        var ctor = type.GetConstructors().FirstOrDefault();
+        if (ctor != null)
+        {
+            foreach (var param in ctor.GetParameters())
+            {
+                var prop = type.GetProperty(param.Name!, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                var val = prop?.GetValue(model);
+                var paramCtx = new ValidationContext(model) { MemberName = param.Name };
+
+                foreach (var attr in param.GetCustomAttributes<ValidationAttribute>())
+                {
+                    var result = attr.GetValidationResult(val, paramCtx);
+                    if (result != null && result != ValidationResult.Success)
+                    {
+                        validationResults.Add(result);
+                    }
+                }
+            }
+        }
+
         return validationResults;
     }
 
@@ -124,4 +150,3 @@ public class ValidationAttributesTests
         results.Should().Contain(r => r.MemberNames.Contains(nameof(RegisterRequest.Password)));
     }
 }
-

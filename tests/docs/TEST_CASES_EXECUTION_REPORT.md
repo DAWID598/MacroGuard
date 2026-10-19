@@ -142,11 +142,50 @@ pie title Status Wykonania Testów (24 przypadki - 100%)
 
 ---
 
-## 4. Wnioski i Decyzja o Wydaniu (Release Sign-Off)
+---
+
+## 4. Raport z Wykonania Automatycznych Testów Integracyjnych API (Playwright + TypeScript)
+
+| Pakiet testowy | Plik testowy | Liczba testów | Status | Czas wykonania |
+|---|---|:---:|:---:|:---:|
+| Moduł Autoryzacji & Bezpieczeństwa | `tests/api/auth.spec.ts` | **5 / 5** | 🟢 **100% PASS** | **6.5 s** |
+| Moduł Dziennika Żywieniowego | `tests/api/diary.spec.ts` | **5 / 5** | 🟢 **100% PASS** | **0.3 s** |
+| Moduł Bazy Produktów Spożywczych | `tests/api/foods.spec.ts` | **3 / 3** | 🟢 **100% PASS** | **1.4 s** |
+| Moduł Monitorowania Wagi & Postępy | `tests/api/weights.spec.ts` | **4 / 4** | 🟢 **100% PASS** | **0.2 s** |
+| **ŁĄCZNIE (Środowisko API Integration):** | `tests/api/*.spec.ts` | **17 / 17** | 🟢 **100% PASS** | **~12 s** |
+
+### Szczegółowe pokrycie scenariuszy integracyjnych:
+1. **`auth.spec.ts` (5 testów 🟢 PASS):**
+   - `TC-AUTH-001 & BUG-002`: Rejestracja nowego użytkownika, weryfikacja wysyłki maila do Mailpita i **potwierdzenie braku tokenu JWT przed aktywacją**.
+   - `TC-AUTH-003`: Odrzucenie próby logowania przed aktywacją adresu e-mail (HTTP `403 Forbidden` z flagą `requiresEmailConfirmation: true`).
+   - `TC-AUTH-004`: Automatyczne pobranie wiadomości ze skrzynki Mailpit przez API (`http://localhost:8025/api/v1`), wyciągnięcie tokenu aktywacyjnego wyrażeniem regularnym, pomyślna aktywacja (`POST /api/auth/confirm-email`) i zalogowanie (`POST /api/auth/login`).
+   - `TC-AUTH-005`: Weryfikacja mechanizmu ochrony przed atakami Brute Force — 5 błędnych prób logowania wywołuje blokadę konta na 5 minut (HTTP `423 Locked`), zablokowane nawet przy podaniu poprawnego hasła.
+   - `TC-AUTH-007`: Ochrona punktów końcowych z atrybutem `[Authorize]` przed nieautoryzowanym dostępem (HTTP `401 Unauthorized`).
+2. **`diary.spec.ts` (5 testów 🟢 PASS):**
+   - `TC-DIARY-001`: Dodanie porcji 150g produktu z bazy (`POST /api/diary`) i weryfikacja sum kalorii i makroskładników w podsumowaniu dziennika (`GET /api/diary?date=...`).
+   - `TC-DIARY-003`: Usunięcie pojedynczej pozycji z posiłku (`DELETE /api/diary/{id}`) i weryfikacja natychmiastowej aktualizacji bilansu dziennika (HTTP `204 NoContent`).
+   - `TC-DIARY-004 & BUG-003`: Masowe usunięcie wszystkich pozycji z posiłku (`DELETE /api/diary/clear-meal?date=...&mealType=...`) i wyzerowanie kalorii.
+   - `TC-DIARY-007`: Kopiowanie całego posiłku z dnia poprzedniego (`POST /api/diary/copy-meal`) z zachowaniem gramatur i przeliczeniem wartości odżywczych.
+   - Walidacja danych wejściowych: odrzucenie wag $\le 0$ g, ujemnych oraz $> 5000$ g (HTTP `400 Bad Request`) oraz próby dodania nieistniejącego `FoodItemId` (HTTP `404 Not Found`).
+3. **`foods.spec.ts` (3 testy 🟢 PASS):**
+   - `TC-FOOD-001`: Wyszukiwanie produktów z bazy z filtrowaniem po tekście i kategorii (`GET /api/foods?query=...&category=...`).
+   - `TC-FOOD-002`: Utworzenie własnego produktu spożywczego (`POST /api/foods`) i weryfikacja **izolacji danych** (inny użytkownik nie widzi customowego produktu pierwszego użytkownika).
+   - Walidacja parametrów: odrzucenie pustej nazwy oraz makroskładników spoza zakresu 0-100g (HTTP `400 Bad Request`).
+4. **`weights.spec.ts` (4 testy 🟢 PASS):**
+   - `TC-WGHT-001`: Zapisanie pomiaru wagi (`POST /api/weights`), weryfikacja w historii oraz podsumowaniu statystyk (`GET /api/weights/stats`).
+   - `TC-WGHT-002`: **Upsert wagi w tym samym dniu** — ponowny zapis dla tej samej daty aktualizuje istniejący wiersz zamiast tworzyć duplikat (zgodność z unikalnym indeksem `UserId + Date`).
+   - Walidacja BVA: odrzucenie wagi $< 20$ kg oraz $> 400$ kg (HTTP `400 Bad Request`).
+   - Usunięcie wpisu wagi (`DELETE /api/weights/{id}`).
+
+---
+
+## 5. Wnioski i Decyzja o Wydaniu (Release Sign-Off)
 
 * **Testy manualne (ISTQB):** **24 / 24 przypadki testowe zaliczone (100% PASS)**.
-* **Testy jednostkowe (.NET 10 / xUnit):** **32 / 32 testy zaliczone (100% PASS, 106 ms)**.
+* **Testy jednostkowe (.NET 10 / xUnit):** **32 / 32 testy zaliczone (100% PASS, 83 ms)**.
+* **Testy integracyjne API (Playwright + TS):** **17 / 17 testów zaliczonych (100% PASS, ~12 s)**.
 * **Krytyczne błędy blokujące (P0):** **0**.
-* **Decyzja:** 🟢 **Wydanie zatwierdzone (Release Approved)** — podstawa piramidy testów i kluczowe reguły biznesowe w pełni zabezpieczone automatycznie.
+* **Decyzja:** 🟢 **Wydanie zatwierdzone (Release Approved)** — dwa kluczowe poziomy piramidy testów (jednostkowy i integracyjny) w pełni zautomatyzowane i zabezpieczające aplikację przed regresją.
+
 
 
