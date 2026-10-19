@@ -1,4 +1,9 @@
-# MacroGuard 
+# MacroGuard 🥑
+
+[![Manual Tests](https://img.shields.io/badge/Manual%20Tests-24%2F24%20PASS%20(100%25)-brightgreen?style=flat-square&logo=checkmarx)](tests/docs/TEST_CASES_EXECUTION_REPORT.md)
+[![QA Standards](https://img.shields.io/badge/QA%20Standards-ISTQB%20%7C%20IEEE%20829-blue?style=flat-square)](tests/docs/TEST_PLAN.md)
+[![Defects](https://img.shields.io/badge/Defects-5%20Closed%20%2F%20Resolved-success?style=flat-square)](tests/docs/BUG_REPORTS.md)
+[![Automation](https://img.shields.io/badge/Automation-Playwright%20%7C%20TypeScript-orange?style=flat-square)](#)
 
 Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / Węglowodany), wyliczania zapotrzebowania kalorycznego (**BMR / TDEE** wg wzoru Mifflin-St Jeor), prowadzenia dziennika żywieniowego z podziałem na **4 posiłki** (*Śniadanie, Obiad, Przekąska, Kolacja*) oraz **inteligentnego generatora przepisów AI** (*„Nie masz pomysłu? Wygeneruj posiłek”*).
 
@@ -122,6 +127,38 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
 - **Dynamiczny licznik posiłków w górnym menu (Navbar):**
   - Pasek nawigacji na bieżąco dostosowuje etykietę: `Dziennik (1 posiłek)`, `Dziennik (X posiłki)`, `Dziennik (X posiłków)` w zależności od aktualnie wyświetlanej liczby posiłków w dzienniku.
   - Dodanie lub usunięcie posiłku (np. *Napoje i Płyny*, *II Śniadanie*) natychmiast aktualizuje cyfrę w navbarze w czasie rzeczywistym.
+
+---
+
+## 🧪 Zapewnienie Jakości & Dokumentacja Testowa (QA & Testing)
+
+Aplikacja została objęta kompleksowym procesem zapewnienia jakości (**Quality Assurance**) prowadzonym zgodnie ze standardami **ISTQB** oraz normą **IEEE 829**. Projekt łączy w sobie pełną dokumentację testów manualnych, analizę ryzyka biznesowego (**Risk-Based Testing**), formalny rejestr błędów z pełnym cyklem życia defektu oraz przygotowanie do automatyzacji E2E/API w Playwright.
+
+### 📁 Dokumentacja Testowa (`tests/docs/`)
+
+| Dokument | Standard / Metodyka | Opis zawartości | Link |
+|---|---|---|:---:|
+| 📋 **Test Plan** | IEEE 829 / ISTQB | Strategia testowa, matryca RBT (Risk-Based Testing), kryteria wejścia/wyjścia (Entry/Exit Criteria), zakres testów oraz architektura środowiskowa | [Zobacz dokument](tests/docs/TEST_PLAN.md) |
+| 📑 **Test Cases** | ISTQB Test Specification | Specyfikacja **24 precyzyjnych przypadków testowych** (P0–P2) z warunkami wstępnymi, krokami i oczekiwanym rezultatem (20 wytypowanych do automatyzacji) | [Zobacz przypadki](tests/docs/TEST_CASES.md) |
+| 📊 **Execution Report** | Test Summary Report | Raport z manualnego wykonania testów: **24 / 24 PASS (100% zaliczenia)**, metryki, log z wykonania oraz formalny Release Sign-Off | [Zobacz raport](tests/docs/TEST_CASES_EXECUTION_REPORT.md) |
+| 🐞 **Bug Reports** | Defect Lifecycle Log | Rejestr **5 rzeczywistych defektów** (`BUG-001` do `BUG-005`) z pełną ścieżką: kroki odtworzenia, analiza przyczyny źródłowej, re-testy i status 🟢 CLOSED | [Zobacz defekty](tests/docs/BUG_REPORTS.md) |
+
+### 📊 Metryki Jakościowe (Stan na Październik 2026)
+
+* **Łączna liczba przypadków testowych:** `24`
+  * 🔴 **Krytyczne (P0 Smoke):** `5 / 5 (100% PASS)`
+  * 🟡 **Biznesowe (P1 Functional):** `16 / 16 (100% PASS)`
+  * 🔵 **Normalne (P2 Regresja):** `3 / 3 (100% PASS)`
+* **Skuteczność wykonania testów:** **100% (24 / 24 zaliczone pomyślnie, 0 defektów blokujących)**
+* **Wykryte i naprawione defekty:** `5` (wszystkie zweryfikowane w re-testach i zamknięte)
+* **Środowisko testów manualnych:** Windows 10 Home 64-bit | Google Chrome 155.0 (Desktop 1920x1080) | Emulacja mobilna DevTools: Samsung Galaxy S20 Ultra (412x915)
+
+### 🚀 Następny krok: Automatyzacja Testów & CI/CD
+Przygotowano podwaliny pod kompleksowy zestaw testów automatycznych:
+* **Framework:** Playwright + TypeScript
+* **Architektura testów:** Page Object Model (POM)
+* **Zakres:** 20 przypadków testowych wytypowanych do automatyzacji (`🤖 Playwright E2E / API`)
+* **Integracja ciągła (CI/CD):** GitHub Actions Pipeline (uruchamianie kontenerów PostgreSQL + Mailpit, backendu i frontendu oraz testów E2E z generowaniem raportu HTML)
 
 ---
 
