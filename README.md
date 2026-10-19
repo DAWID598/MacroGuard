@@ -2,7 +2,7 @@
 
 Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / Węglowodany), wyliczania zapotrzebowania kalorycznego (**BMR / TDEE** wg wzoru Mifflin-St Jeor), prowadzenia dziennika żywieniowego z podziałem na **4 posiłki** (*Śniadanie, Obiad, Przekąska, Kolacja*) oraz **inteligentnego generatora przepisów AI** (*„Nie masz pomysłu? Wygeneruj posiłek”*).
 
-## Stos Technologiczny
+## Technologie:
 
 - **Frontend:** Angular 19 (Standalone Components, Signals, Reactive Forms) + **Angular Material**
 - **Backend:** .NET 10 Web API (**Clean Architecture**: `Domain`, `Application`, `Infrastructure`, `Api`), Entity Framework Core, ASP.NET Core Identity + JWT Bearer
@@ -11,7 +11,7 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
 
 ---
 
-## Nowe Funkcjonalności
+## Funkcjonalności
 
 ### 1. Inteligentny Generator Posiłków AI (Uniwersalne Wsparcie dla Każdego Modelu)
 - **Wybór i prezentacja modelu na żywo:** Aplikacja automatycznie wykrywa skonfigurowany model i **wyświetla jego nazwę w oknie generatora oraz na karcie przepisu** (np. `OpenAI (gpt-4o-mini)`, `Google Gemini (gemini-1.5-flash)`, `Anthropic Claude`, `Ollama` lub `Wbudowany silnik kulinarny MacroGuard`).
@@ -108,7 +108,7 @@ Aplikacja webowa do liczenia kalorii, makroskładników (Białko / Tłuszcze / W
   - Dodano do seederów bazę artykułów: *Coca-Cola Original (10.6g cukru / 42 kcal)*, *Coca-Cola Zero (0 kcal)*, *Pepsi Max (0 kcal)*, *Pepsi*, *Fanta*, *Sprite*, *Soki 100%*, *Woda mineralna*, *Kawa czarna*, *Kawa z mlekiem*, *Latte*, *Herbaty*, *Energetyki klasyczne i Zero*, *Izotoniki*, *Piwo jasne* oraz *Piwo 0.0%*.
 - **Wygodne logowanie w mililitrach (ml):**
   - W oknie dodawania produktu przy wyborze napoju jednostka zmienia się na `ml / g`, a podręczne przyciski oferują realne porcje: *150 ml (mała szklanka)*, *250 ml (szklanka)*, *330 ml (puszka)* oraz *500 ml (butelka)*.
-  - Napoje można dodawać bezpośrednio do dowolnego posiłku (śniadanie, obiad itp.) lub jako dedykowany kafel *„🥤 Napoje i Płyny”*.
+  - Napoje można dodawać bezpośrednio do dowolnego posiłku (śniadanie, obiad itp.) lub jako dedykowany kafelek *„🥤 Napoje i Płyny”*.
 
 ### 12. Dedykowany Rozdział „Popularne Pułapki — Na Co Uważać?” & Dynamiczny Pasek Nawigacji
 - **Nowy rozdział w Bazie Wiedzy (`/guide`):**
@@ -132,7 +132,6 @@ Upewnij się, że aplikacja **Docker Desktop** jest włączona, a następnie w g
 ```powershell
 docker compose up -d
 ```
-> [!TIP]
 > Lokalna skrzynka pocztowa **Mailpit** jest dostępna w przeglądarce pod adresem: `http://localhost:8025`. Trafiają tam wszystkie e-maile z resetem hasła wysyłane przez aplikację — **działa od strzała dla każdego bez konfiguracji**!
 
 ### 2. Uruchom Backend (.NET 10 API)
