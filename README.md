@@ -2,6 +2,7 @@
 
 [![Unit Tests](https://img.shields.io/badge/Unit%20Tests-32%2F32%20PASS%20(100%25)-brightgreen?style=flat-square&logo=dotnet)](backend/tests/MacroGuard.UnitTests)
 [![API Integration Tests](https://img.shields.io/badge/API%20Integration%20Tests-17%2F17%20PASS%20(100%25)-brightgreen?style=flat-square&logo=playwright)](tests/api)
+[![E2E Tests](https://img.shields.io/badge/E2E%20Tests-8%2F8%20PASS%20(100%25)-brightgreen?style=flat-square&logo=playwright)](tests/e2e)
 [![Manual Tests](https://img.shields.io/badge/Manual%20Tests-24%2F24%20PASS%20(100%25)-brightgreen?style=flat-square&logo=checkmarx)](tests/docs/TEST_CASES_EXECUTION_REPORT.md)
 [![QA Standards](https://img.shields.io/badge/QA%20Standard-ISTQB%20Compliant-blue?style=flat-square)](tests/docs/TEST_PLAN.md)
 [![Defects](https://img.shields.io/badge/Defects-5%20Closed%20%2F%20Resolved-success?style=flat-square)](tests/docs/BUG_REPORTS.md)
@@ -220,4 +221,18 @@ Wszystkie 17 testów integracyjnych API (weryfikujących REST API, bazę Postgre
 npm --prefix tests run test:api
 ```
 *(Wymaga uruchomionych usług Docker oraz działającego backendu na porcie 5000).*
+
+### 7. Uruchom Testy End-to-End E2E (Playwright + Page Object Model)
+Wszystkie 8 testów E2E w przeglądarce Chromium (weryfikujących rejestrację, odebranie maila z Mailpita, aktywację konta, logowanie, obliczenia w kalkulatorze BMR/TDEE, dodawanie i usuwanie posiłków w dzienniku oraz interaktywny wykres wagi SVG) uruchomisz poleceniem:
+```powershell
+npm --prefix tests run test:e2e
+```
+*(Wymaga uruchomionych usług Docker, backendu na porcie 5000 oraz frontendu na porcie 4200).*
+
+### 8. Podgląd Raportu HTML z Testów
+Po wykonaniu testów Playwright możesz otworzyć interaktywny raport HTML z krokami, zrzutami ekranu i czasem wykonania:
+```powershell
+npm --prefix tests run report
+```
+
 

@@ -70,6 +70,8 @@ export function generateRandomUser(prefix = 'test-qa'): TestUser {
   };
 }
 
+export const BACKEND_URL = process.env.API_BASE_URL || 'http://localhost:5000';
+
 /**
  * Tworzy i od razu aktywuje użytkownika przez API, zwracając token JWT.
  */
@@ -77,7 +79,7 @@ export async function createAndActivateUser(request: APIRequestContext, user?: T
   const testUser = user || generateRandomUser('active');
 
   // 1. Rejestracja
-  const regRes = await request.post('/api/auth/register', {
+  const regRes = await request.post(`${BACKEND_URL}/api/auth/register`, {
     data: {
       email: testUser.email,
       password: testUser.password,
@@ -93,7 +95,7 @@ export async function createAndActivateUser(request: APIRequestContext, user?: T
   expect(token).toBeTruthy();
 
   // 3. Aktywacja konta
-  const confirmRes = await request.post('/api/auth/confirm-email', {
+  const confirmRes = await request.post(`${BACKEND_URL}/api/auth/confirm-email`, {
     data: {
       email: testUser.email,
       token: token!,
@@ -102,7 +104,7 @@ export async function createAndActivateUser(request: APIRequestContext, user?: T
   expect(confirmRes.status()).toBe(200);
 
   // 4. Logowanie
-  const loginRes = await request.post('/api/auth/login', {
+  const loginRes = await request.post(`${BACKEND_URL}/api/auth/login`, {
     data: {
       email: testUser.email,
       password: testUser.password,

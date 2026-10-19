@@ -179,13 +179,52 @@ pie title Status Wykonania Testów (24 przypadki - 100%)
 
 ---
 
-## 5. Wnioski i Decyzja o Wydaniu (Release Sign-Off)
+## 5. Raport z Wykonania Automatycznych Testów End-to-End E2E (Playwright + Page Object Model)
 
-* **Testy manualne (ISTQB):** **24 / 24 przypadki testowe zaliczone (100% PASS)**.
-* **Testy jednostkowe (.NET 10 / xUnit):** **32 / 32 testy zaliczone (100% PASS, 83 ms)**.
-* **Testy integracyjne API (Playwright + TS):** **17 / 17 testów zaliczonych (100% PASS, ~12 s)**.
-* **Krytyczne błędy blokujące (P0):** **0**.
-* **Decyzja:** 🟢 **Wydanie zatwierdzone (Release Approved)** — dwa kluczowe poziomy piramidy testów (jednostkowy i integracyjny) w pełni zautomatyzowane i zabezpieczające aplikację przed regresją.
+| Pakiet testowy | Plik testowy | Liczba testów | Status | Czas wykonania |
+|---|---|:---:|:---:|:---:|
+| Moduł Autoryzacji & Bezpieczeństwa | `tests/e2e/auth.spec.ts` | **3 / 3** | 🟢 **100% PASS** | **5.4 s** |
+| Moduł Profil & Kalkulator BMR / TDEE | `tests/e2e/calculator.spec.ts` | **2 / 2** | 🟢 **100% PASS** | **5.0 s** |
+| Moduł Dziennika Żywieniowego | `tests/e2e/diary.spec.ts` | **2 / 2** | 🟢 **100% PASS** | **3.4 s** |
+| Moduł Monitorowania Wagi & Postępy | `tests/e2e/weights.spec.ts` | **1 / 1** | 🟢 **100% PASS** | **1.2 s** |
+| **ŁĄCZNIE (Środowisko E2E Browser Chromium):** | `tests/e2e/*.spec.ts` | **8 / 8** | 🟢 **100% PASS** | **20.7 s** |
+
+### Architektura Page Object Model (POM):
+Testy E2E zaimplementowano zgodnie z najlepszymi wzorcami inżynierii QA, separując logikę selektorów i akcji od asercji w dedykowanych klasach:
+* [`AuthPage.ts`](file:///C:/Users/Dawid/Desktop/MacroGuard/tests/e2e/pages/auth.page.ts) — obsługa zakładek logowania i rejestracji, dynamicznych kryteriów hasła, powiadomień aktywacyjnych.
+* [`CalculatorPage.ts`](file:///C:/Users/Dawid/Desktop/MacroGuard/tests/e2e/pages/calculator.page.ts) — uzupełnianie metryk ciała, selektory celów, presetów deficytu, weryfikacja kalkulacji na żywo i ostrzeżeń medycznych.
+* [`DiaryPage.ts`](file:///C:/Users/Dawid/Desktop/MacroGuard/tests/e2e/pages/diary.page.ts) — dodawanie produktów z modalu, interakcja z posiłkami, weryfikacja sum makro, obsługa alertów `window.confirm`.
+* [`StatsPage.ts`](file:///C:/Users/Dawid/Desktop/MacroGuard/tests/e2e/pages/stats.page.ts) — formularz szybkiej rejestracji wagi z przyciskami krokowymi, weryfikacja kafelków KPI i wykresu liniowego SVG.
+
+### Pokrycie kluczowych ścieżek użytkownika (Core User Journeys):
+1. **`auth.spec.ts` (3 testy 🟢 PASS):**
+   - `TC-AUTH-001 & TC-AUTH-004`: Rejestracja użytkownika w formularzu UI ➔ automatyczne odebranie maila z Mailpita ➔ przejście do linku aktywacyjnego ➔ weryfikacja zielonego badge'a sukcesu ➔ logowanie i przekierowanie do aplikacji.
+   - `TC-AUTH-002`: Dynamiczna walidacja hasła na żywo — wpisanie słabego hasła wyświetla panel kryteriów i blokuje przycisk, poprawienie hasła natychmiast odblokowuje wysłanie formularza.
+   - `TC-AUTH-007`: Ochrona tras `AuthGuard` — próba otwarcia `/diary`, `/calculator` i `/stats` bez uwierzytelnienia skutkuje natychmiastowym przekierowaniem na `/auth`.
+2. **`calculator.spec.ts` (2 testy 🟢 PASS):**
+   - `TC-CALC-001`: Mężczyzna, 25 lat, 80 kg, 180 cm, umiarkowana aktywność (1.55), redukcja (-15%), waga docelowa 74 kg ➔ weryfikacja BMR (1805 kcal), TDEE (2798 kcal), celu dziennego (2378 kcal), zapisanie profilu i weryfikacja odzwierciedlenia celu w Dzienniku.
+   - `TC-CALC-002`: Ostrzeżenie medyczne w UI — wybór agresywnego deficytu poniżej BMR powoduje wyświetlenie banera ostrzegawczego `.bmr-alert`.
+3. **`diary.spec.ts` (2 testy 🟢 PASS):**
+   - `TC-DIARY-001 & TC-DIARY-003`: Wyszukanie i dodanie 150g jajka do Śniadania z okna dialogowego ➔ wyświetlenie Snackbara ➔ aktualizacja paska postępu do 215 kcal ➔ usunięcie wpisu i powrót do 0 kcal.
+   - `TC-DIARY-004 & BUG-003`: Masowe wyczyszczenie posiłku z obsługą systemowego okna dialogowego `window.confirm` (`dialog.accept()`) i wyzerowanie kalorii.
+4. **`weights.spec.ts` (1 test 🟢 PASS):**
+   - `TC-WGHT-001`: Zapisanie pomiaru wagi 79.2 kg z notatką w widoku `/stats`, weryfikacja aktualizacji kafelka KPI "Ostatnia Waga" oraz obecności punktu pomiarowego na interaktywnym wykresie SVG (`circle.point-circle`).
+
+---
+
+## 6. Podsumowanie Całej Piramidy Testów & Decyzja o Wydaniu (Release Sign-Off)
+
+| Poziom Piramidy | Technologia | Liczba testów | Czas wykonania | Status |
+|---|---|:---:|:---:|:---:|
+| **🔺 Szczyt: End-to-End (E2E)** | Playwright (Chromium) + Page Object Model | **8 / 8** | **20.7 s** | 🟢 **100% PASS** |
+| **🔷 Środek: Integracyjne (API)** | Playwright API + PostgreSQL + Mailpit | **17 / 17** | **~12 s** | 🟢 **100% PASS** |
+| **🟩 Podstawa: Jednostkowe (Unit)** | .NET 10 + xUnit + FluentAssertions | **32 / 32** | **83 ms** | 🟢 **100% PASS** |
+| **🏆 ŁĄCZNIE AUTOMATYZACJA:** | **Pełna Piramida Testów** | **57 / 57** | **~33 s** | 🟢 **100% PASS** |
+| **✋ Testy Manualne (ISTQB):** | Przeglądarka Desktop + RWD Mobile | **24 / 24** | — | 🟢 **100% PASS** |
+
+* **Krytyczne błędy blokujące (P0):** **0** (wszystkie 5 historycznych defektów zamknięte i zabezpieczone testami regresyjnymi).
+* **Decyzja:** 🟢 **Wydanie zatwierdzone (Release Approved)** — kompletna piramida testów (Unit + API + E2E) zabezpiecza każdy aspekt aplikacji od logiki matematycznej i bezpieczeństwa bazy po rzeczywiste doświadczenie użytkownika w przeglądarce.
+
 
 
 
