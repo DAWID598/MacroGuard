@@ -73,7 +73,6 @@ jobs:
           Smtp__SenderEmail: "noreply@macroguard-test.local"
           Smtp__SenderName: "MacroGuard Test"
           ASPNETCORE_URLS: "http://localhost:5000"
-          RateLimiter__PermitLimit: "1000"
         run: |
           dotnet run --project backend/src/MacroGuard.Api --no-launch-profile &
           npx wait-on -t 60000 tcp:localhost:5000

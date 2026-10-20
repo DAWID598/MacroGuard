@@ -18,7 +18,7 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddFixedWindowLimiter("auth-endpoints", opt =>
     {
-        opt.PermitLimit = builder.Configuration.GetValue<int?>("RateLimiter:PermitLimit") ?? (builder.Environment.IsDevelopment() ? 500 : 10);
+        opt.PermitLimit = builder.Environment.IsDevelopment() ? 100 : 10;
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 0;
