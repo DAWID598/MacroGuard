@@ -151,12 +151,44 @@ Aplikacja została objęta kompleksowym procesem zapewnienia jakości (**Quality
 * **Wykryte i naprawione defekty:** `5` (wszystkie zweryfikowane w re-testach i zamknięte)
 * **Środowisko testów manualnych:** Windows 10 Home 64-bit | Google Chrome 155.0 (Desktop 1920x1080) | Emulacja mobilna DevTools: Samsung Galaxy S20 Ultra (412x915)
 
-### 🚀 Następny krok: Automatyzacja E2E & CI/CD
-Przygotowano podwaliny pod kompleksowy zestaw testów automatycznych:
-* **Framework:** Playwright + TypeScript
-* **Architektura testów:** Page Object Model (POM)
-* **Zakres:** 20 przypadków testowych wytypowanych do automatyzacji (`🤖 Playwright E2E / API`)
-* **Integracja ciągła (CI/CD):** GitHub Actions Pipeline (uruchamianie kontenerów PostgreSQL + Mailpit, backendu i frontendu oraz testów E2E z generowaniem raportu HTML)
+### 🚀 Automatyzacja Testów & Piramida Jakości (57/57 PASS)
+Projekt posiada kompletną, 3-poziomową piramidę testów automatycznych ze 100% wskaźnikiem powodzenia:
+* **Unit Tests (.NET 10 / xUnit + FluentAssertions):** 32 testy weryfikujące formuły BMR/TDEE (Mifflin-St Jeor), współczynniki PAL, skalowanie makroskładników oraz reguły walidacji.
+* **API Integration Tests (Playwright + TypeScript):** 17 testów badających REST API, autentykację JWT, tokeny aktywacyjne via Mailpit SMTP API oraz ochronę przed atakami Brute Force (HTTP 423 Locked).
+* **End-to-End E2E Tests (Playwright + Page Object Model):** 8 testów w przeglądarce Chromium weryfikujących krytyczne ścieżki użytkownika (rejestracja i aktywacja konta, live walidacja haseł, strażnicy AuthGuard, dziennik żywieniowy i wykresy SVG wagi).
+
+---
+
+## 🔄 CI/CD Pipeline & Quality Gates
+
+W projekcie wdrożono dwupoziomowy mechanizm ciągłej integracji i kontroli jakości (Quality Gate):
+
+### 1. Lokalny Git Pre-Commit Hook ([scripts/hooks/pre-commit](scripts/hooks/pre-commit))
+Każde polecenie git commit automatycznie wywołuje skrypt weryfikacyjny:
+* **Blokada wadliwego kodu:** Jeśli testy zakończą się błędem (exit 1), Git natychmiast anuluje zatwierdzenie commita, uniemożliwiając wprowadzenie regresji do repozytorium.
+* **Włączenie hooka w repozytorium:**
+  ```powershell
+git config core.hooksPath scripts/hooks
+``
+
+### 2. Skrypt symulacji CI/CD ([./scripts/run-ci.ps1](scripts/run-ci.ps1))
+Umożliwia uruchomienie całego pipeline'u weryfikacyjnego jednym poleceniem z poziomu konsoli:
+```powershell
+# Pełny pipeline (Unit -> API -> E2E):
+./scripts/run-ci.ps1
+
+# Szybki test jednostkowy (Fast Quality Gate):
+./scripts/run-ci.ps1 -Quick
+``
+
+### 3. GitHub Actions Cloud CI/CD ([.github/workflows/ci.yml](.github/workflows/ci.yml))
+Przy każdym git push lub Pull Request na gałąź main, GitHub Actions automatycznie uruchamia w chmurze (Ubuntu):
+1. Usługi bazodanowe (kontenery Docker: PostgreSQL 17 + Mailpit).
+2. Środowisko .NET 10 oraz Node.js 22.
+3. Testy jednostkowe xUnit.
+4. Kompilację i start backendu oraz frontendu.
+5. Testy integracyjne API oraz E2E w Playwright Chromium.
+6. Publikację artefaktów (raport HTML Playwright) w razie wykrycia problemów.
 
 ---
 
@@ -166,21 +198,21 @@ Przygotowano podwaliny pod kompleksowy zestaw testów automatycznych:
 Plik `.env` zawiera poświadczenia do bazy danych i ze względów bezpieczeństwa nie jest commitowany do repozytorium.
 
 1. Skopiuj szablon przygotowany w projekcie:
-```powershell
+````powershell
 cp .env.example .env
 ```
 2. Otwórz utworzony plik `.env` i w polu `POSTGRES_PASSWORD` **ustal własne hasło do bazy danych** (np. `POSTGRES_PASSWORD=twoje_bezpieczne_haslo`). Wartości `POSTGRES_USER=macroguard` oraz `POSTGRES_DB=macroguard_db` pozostaw bez zmian.
 
 ### 2. Uruchom usługi Docker (PostgreSQL 17 + serwer pocztowy Mailpit)
 Upewnij się, że aplikacja **Docker Desktop** jest włączona, a następnie w głównym katalogu uruchom:
-```powershell
+````powershell
 docker compose up -d
 ```
 > Lokalna skrzynka pocztowa **Mailpit** jest dostępna w przeglądarce pod adresem: `http://localhost:8025`. Trafiają tam wszystkie e-maile z resetem hasła wysyłane przez aplikację — **działa od strzała dla każdego bez konfiguracji**!
 
 ### 3. Uruchom Backend (.NET 10 API)
 Przy pierwszym uruchomieniu API automatycznie utworzy tabele w bazie PostgreSQL i wypełni bazę 75+ popularnymi produktami spożywczymi (mięsa, ryby, nabiał, warzywa, owoce, orzechy oraz tłuszcze i oleje):
-```powershell
+````powershell
 dotnet run --project backend/src/MacroGuard.Api
 ```
 Backend nasłuchuje pod adresem: `http://localhost:5000`
@@ -203,27 +235,27 @@ Aplikacja będzie dostępna w przeglądarce pod adresem: `http://localhost:4200`
 
 ### 5. Uruchom Testy Jednostkowe (.NET 10 / xUnit)
 Wszystkie 32 testy jednostkowe uruchomisz jednym poleceniem z poziomu głównego katalogu:
-```powershell
+````powershell
 dotnet test backend/tests/MacroGuard.UnitTests/MacroGuard.UnitTests.csproj
 ```
 
 ### 6. Uruchom Testy Integracyjne API (Playwright + TypeScript)
 Wszystkie 17 testów integracyjnych API (weryfikujących REST API, bazę PostgreSQL, tokeny JWT oraz integrację SMTP Mailpit) uruchomisz poleceniem:
-```powershell
+````powershell
 npm --prefix tests run test:api
 ```
 *(Wymaga uruchomionych usług Docker oraz działającego backendu na porcie 5000).*
 
 ### 7. Uruchom Testy End-to-End E2E (Playwright + Page Object Model)
 Wszystkie 8 testów E2E w przeglądarce Chromium (weryfikujących rejestrację, odebranie maila z Mailpita, aktywację konta, logowanie, obliczenia w kalkulatorze BMR/TDEE, dodawanie i usuwanie posiłków w dzienniku oraz interaktywny wykres wagi SVG) uruchomisz poleceniem:
-```powershell
+````powershell
 npm --prefix tests run test:e2e
 ```
 *(Wymaga uruchomionych usług Docker, backendu na porcie 5000 oraz frontendu na porcie 4200).*
 
 ### 8. Podgląd Raportu HTML z Testów
 Po wykonaniu testów Playwright możesz otworzyć interaktywny raport HTML z krokami, zrzutami ekranu i czasem wykonania:
-```powershell
+````powershell
 npm --prefix tests run report
 ```
 

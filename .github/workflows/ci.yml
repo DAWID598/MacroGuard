@@ -1,0 +1,98 @@
+name: MacroGuard CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-pyramid:
+    name: 🛡️ Test Pyramid & Quality Gate
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: macroguard
+          POSTGRES_PASSWORD: ci_test_password
+          POSTGRES_DB: macroguard_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mailpit:
+        image: axllent/mailpit:latest
+        ports:
+          - 8025:8025
+          - 1025:1025
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      # Stage 1: Unit Tests (32/32)
+      - name: 🧪 [Stage 1/3] Run Unit Tests (.NET 10 / xUnit)
+        run: dotnet test backend/tests/MacroGuard.UnitTests/MacroGuard.UnitTests.csproj --nologo -v normal
+
+      # Stage 2: Install dependencies & Start Backend + Frontend
+      - name: 📦 Install Frontend dependencies
+        run: npm --prefix frontend ci
+
+      - name: 📦 Install Test dependencies & Playwright browsers
+        run: |
+          npm --prefix tests ci
+          npx --prefix tests playwright install --with-deps chromium
+
+      - name: 🚀 Start Backend API
+        env:
+          ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=macroguard_db;Username=macroguard;Password=ci_test_password"
+          Jwt__Key: "ci_jwt_secret_key_minimum_32_characters_long_for_security_testing!"
+          Jwt__Issuer: "MacroGuard.Api"
+          Jwt__Audience: "MacroGuard.App"
+          Smtp__Host: "localhost"
+          Smtp__Port: "1025"
+          Smtp__SenderEmail: "noreply@macroguard-test.local"
+          Smtp__SenderName: "MacroGuard Test"
+        run: |
+          dotnet run --project backend/src/MacroGuard.Api --no-launch-profile &
+          npx wait-on -t 30000 http-get://localhost:5000/api/foods
+
+      - name: 🚀 Start Frontend Application
+        run: |
+          npm --prefix frontend start &
+          npx wait-on -t 45000 http-get://localhost:4200
+
+      # Stage 3: API Integration Tests (17/17)
+      - name: 🔌 [Stage 2/3] Run API Integration Tests (Playwright)
+        run: npm --prefix tests run test:api
+
+      # Stage 4: E2E Tests (8/8)
+      - name: 🎭 [Stage 3/3] Run End-to-End Tests (Playwright POM)
+        run: npm --prefix tests run test:e2e
+
+      # Artifacts: Upload Playwright Report on Failure
+      - name: 📊 Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: tests/playwright-report/
+          retention-days: 14
