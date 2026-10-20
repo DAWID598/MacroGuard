@@ -10,6 +10,8 @@ jobs:
   test-pyramid:
     name: Test Pyramid & Quality Gate
     runs-on: ubuntu-latest
+    env:
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'ci_test_password' }}
 
     services:
       postgres:
@@ -65,7 +67,6 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: "Development"
           ASPNETCORE_URLS: "http://localhost:5000"
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'ci_test_password' }}
         run: |
           dotnet run --project backend/src/MacroGuard.Api --no-launch-profile &
           npx wait-on -t 60000 tcp:localhost:5000
