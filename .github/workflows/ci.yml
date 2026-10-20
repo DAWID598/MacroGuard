@@ -63,15 +63,17 @@ jobs:
 
       - name: 🚀 Start Backend API
         env:
+          ASPNETCORE_ENVIRONMENT: "Development"
           ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=macroguard_db;Username=macroguard;Password=ci_test_password"
           Jwt__Key: "ci_jwt_secret_key_minimum_32_characters_long_for_security_testing!"
           Jwt__Issuer: "MacroGuard.Api"
-          Jwt__Audience: "MacroGuard.App"
+          Jwt__Audience: "MacroGuard.Client"
           Smtp__Host: "localhost"
           Smtp__Port: "1025"
           Smtp__SenderEmail: "noreply@macroguard-test.local"
           Smtp__SenderName: "MacroGuard Test"
           ASPNETCORE_URLS: "http://localhost:5000"
+          RateLimiter__PermitLimit: "1000"
         run: |
           dotnet run --project backend/src/MacroGuard.Api --no-launch-profile &
           npx wait-on -t 60000 tcp:localhost:5000
@@ -80,7 +82,7 @@ jobs:
         env:
           NG_CLI_ANALYTICS: "false"
         run: |
-          npm --prefix frontend start &
+          npm --prefix frontend start -- --host 0.0.0.0 &
           npx wait-on -t 90000 tcp:localhost:4200
 
       # Stage 3: API Integration Tests (17/17)
