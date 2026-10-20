@@ -1,49 +1,49 @@
 #!/bin/sh
 # ==========================================================
-# 🛡️ MacroGuard Git Pre-Commit Hook (CI/CD Quality Gate)
+# MacroGuard Git Pre-Commit Hook (CI/CD Quality Gate)
 # Automatically executes before each 'git commit'
 # ==========================================================
 
 echo ""
 echo "=========================================================="
-echo "🛡️  MacroGuard Pre-Commit Hook: CI/CD Quality Gate"
+echo "MacroGuard Pre-Commit Hook: CI/CD Quality Gate"
 echo "=========================================================="
 
 # 1. Run Unit Tests (Always required for commit)
-echo "▶ [1/2] Running Unit Tests (.NET 10 / xUnit)..."
+echo "[1/2] Running Unit Tests (.NET 10 / xUnit)..."
 dotnet test backend/tests/MacroGuard.UnitTests/MacroGuard.UnitTests.csproj --nologo -v q
 UNIT_EXIT=$?
 
 if [ $UNIT_EXIT -ne 0 ]; then
   echo ""
-  echo "❌ COMMIT REJECTED: Unit tests failed!"
+  echo "COMMIT REJECTED: Unit tests failed!"
   echo "   Fix failing tests before committing code."
   echo "=========================================================="
   exit 1
 fi
-echo "   ✅ Unit tests PASSED (32/32)"
+echo "   Unit tests PASSED (32/32)"
 
 # 2. Check if Backend is available for API tests
 if curl -s --connect-timeout 2 http://localhost:5000/api/foods > /dev/null 2>&1; then
   echo ""
-  echo "▶ [2/2] Backend detected on port 5000. Running API Integration tests..."
+  echo "[2/2] Backend detected on port 5000. Running API Integration tests..."
   npm --prefix tests run test:api
   API_EXIT=$?
   if [ $API_EXIT -ne 0 ]; then
     echo ""
-    echo "❌ COMMIT REJECTED: API Integration tests failed!"
+    echo "COMMIT REJECTED: API Integration tests failed!"
     echo "=========================================================="
     exit 1
   fi
-  echo "   ✅ API tests PASSED (17/17)"
+  echo "   API tests PASSED (17/17)"
 else
   echo ""
-  echo "ℹ️  Backend offline (skipping live API/E2E tests)."
+  echo "Backend offline (skipping live API/E2E tests)."
   echo "   To run all 57 tests, start services and run: ./scripts/run-pipeline.ps1"
 fi
 
 echo ""
-echo "✨ Quality Gate PASSED! Proceeding with git commit."
+echo "Quality Gate PASSED! Proceeding with git commit."
 echo "=========================================================="
 exit 0
 

@@ -164,12 +164,12 @@ Projekt posiada kompletną, 3-poziomową piramidę testów automatycznych ze 100
 W projekcie wdrożono dwupoziomowy mechanizm ciągłej integracji i kontroli jakości (Quality Gate):
 
 ### 1. Lokalny Git Pre-Commit Hook ([scripts/hooks/pre-commit](scripts/hooks/pre-commit))
-Każde polecenie git commit automatycznie wywołuje skrypt weryfikacyjny:
-* **Blokada wadliwego kodu:** Jeśli testy zakończą się błędem (exit 1), Git natychmiast anuluje zatwierdzenie commita, uniemożliwiając wprowadzenie regresji do repozytorium.
+Każde polecenie `git commit` automatycznie wywołuje skrypt weryfikacyjny:
+* **Blokada wadliwego kodu:** Jeśli testy zakończą się błędem (`exit 1`), Git natychmiast anuluje zatwierdzenie commita, uniemożliwiając wprowadzenie regresji do repozytorium.
 * **Włączenie hooka w repozytorium:**
-  ```powershell
+```powershell
 git config core.hooksPath scripts/hooks
-``
+```
 
 ### 2. Skrypt symulacji CI/CD ([./scripts/run-pipeline.ps1](scripts/run-pipeline.ps1))
 Umożliwia uruchomienie całego pipeline'u weryfikacyjnego jednym poleceniem z poziomu konsoli:
@@ -179,10 +179,10 @@ Umożliwia uruchomienie całego pipeline'u weryfikacyjnego jednym poleceniem z p
 
 # Szybki test jednostkowy (Fast Quality Gate):
 ./scripts/run-pipeline.ps1 -Quick
-``
+```
 
 ### 3. GitHub Actions Cloud CI/CD ([.github/workflows/ci.yml](.github/workflows/ci.yml))
-Przy każdym git push lub Pull Request na gałąź main, GitHub Actions automatycznie uruchamia w chmurze (Ubuntu):
+Przy każdym `git push` lub `Pull Request` na gałąź `main`, GitHub Actions automatycznie uruchamia w chmurze (Ubuntu):
 1. Usługi bazodanowe (kontenery Docker: PostgreSQL 17 + Mailpit).
 2. Środowisko .NET 10 oraz Node.js 22.
 3. Testy jednostkowe xUnit.
