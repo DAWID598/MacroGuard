@@ -171,14 +171,14 @@ Każde polecenie git commit automatycznie wywołuje skrypt weryfikacyjny:
 git config core.hooksPath scripts/hooks
 ``
 
-### 2. Skrypt symulacji CI/CD ([./scripts/run-ci.ps1](scripts/run-ci.ps1))
+### 2. Skrypt symulacji CI/CD ([./scripts/run-pipeline.ps1](scripts/run-pipeline.ps1))
 Umożliwia uruchomienie całego pipeline'u weryfikacyjnego jednym poleceniem z poziomu konsoli:
 ```powershell
 # Pełny pipeline (Unit -> API -> E2E):
-./scripts/run-ci.ps1
+./scripts/run-pipeline.ps1
 
 # Szybki test jednostkowy (Fast Quality Gate):
-./scripts/run-ci.ps1 -Quick
+./scripts/run-pipeline.ps1 -Quick
 ``
 
 ### 3. GitHub Actions Cloud CI/CD ([.github/workflows/ci.yml](.github/workflows/ci.yml))
