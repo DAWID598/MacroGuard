@@ -173,12 +173,23 @@ git config core.hooksPath scripts/hooks
 
 ### 2. Skrypt symulacji CI/CD ([./scripts/run-pipeline.ps1](scripts/run-pipeline.ps1))
 Umożliwia uruchomienie całego pipeline'u weryfikacyjnego jednym poleceniem z poziomu konsoli:
+
+**W konsoli PowerShell:**
 ```powershell
 # Pełny pipeline (Unit -> API -> E2E):
-./scripts/run-pipeline.ps1
+.\scripts\run-pipeline.ps1
 
 # Szybki test jednostkowy (Fast Quality Gate):
-./scripts/run-pipeline.ps1 -Quick
+.\scripts\run-pipeline.ps1 -Quick
+```
+
+**W konsoli CMD (Wiersz polecenia Windows):**
+```cmd
+# Pełny pipeline (Unit -> API -> E2E):
+powershell -File .\scripts\run-pipeline.ps1
+
+# Szybki test jednostkowy (Fast Quality Gate):
+powershell -File .\scripts\run-pipeline.ps1 -Quick
 ```
 
 ### 3. GitHub Actions Cloud CI/CD ([.github/workflows/ci.yml](.github/workflows/ci.yml))
@@ -198,21 +209,21 @@ Przy każdym `git push` lub `Pull Request` na gałąź `main`, GitHub Actions au
 Plik `.env` zawiera poświadczenia do bazy danych i ze względów bezpieczeństwa nie jest commitowany do repozytorium.
 
 1. Skopiuj szablon przygotowany w projekcie:
-````powershell
+```powershell
 cp .env.example .env
 ```
 2. Otwórz utworzony plik `.env` i w polu `POSTGRES_PASSWORD` **ustal własne hasło do bazy danych** (np. `POSTGRES_PASSWORD=twoje_bezpieczne_haslo`). Wartości `POSTGRES_USER=macroguard` oraz `POSTGRES_DB=macroguard_db` pozostaw bez zmian.
 
 ### 2. Uruchom usługi Docker (PostgreSQL 17 + serwer pocztowy Mailpit)
 Upewnij się, że aplikacja **Docker Desktop** jest włączona, a następnie w głównym katalogu uruchom:
-````powershell
+```powershell
 docker compose up -d
 ```
 > Lokalna skrzynka pocztowa **Mailpit** jest dostępna w przeglądarce pod adresem: `http://localhost:8025`. Trafiają tam wszystkie e-maile z resetem hasła wysyłane przez aplikację — **działa od strzała dla każdego bez konfiguracji**!
 
 ### 3. Uruchom Backend (.NET 10 API)
 Przy pierwszym uruchomieniu API automatycznie utworzy tabele w bazie PostgreSQL i wypełni bazę 75+ popularnymi produktami spożywczymi (mięsa, ryby, nabiał, warzywa, owoce, orzechy oraz tłuszcze i oleje):
-````powershell
+```powershell
 dotnet run --project backend/src/MacroGuard.Api
 ```
 Backend nasłuchuje pod adresem: `http://localhost:5000`
@@ -235,27 +246,27 @@ Aplikacja będzie dostępna w przeglądarce pod adresem: `http://localhost:4200`
 
 ### 5. Uruchom Testy Jednostkowe (.NET 10 / xUnit)
 Wszystkie 32 testy jednostkowe uruchomisz jednym poleceniem z poziomu głównego katalogu:
-````powershell
+```powershell
 dotnet test backend/tests/MacroGuard.UnitTests/MacroGuard.UnitTests.csproj
 ```
 
 ### 6. Uruchom Testy Integracyjne API (Playwright + TypeScript)
 Wszystkie 17 testów integracyjnych API (weryfikujących REST API, bazę PostgreSQL, tokeny JWT oraz integrację SMTP Mailpit) uruchomisz poleceniem:
-````powershell
+```powershell
 npm --prefix tests run test:api
 ```
 *(Wymaga uruchomionych usług Docker oraz działającego backendu na porcie 5000).*
 
 ### 7. Uruchom Testy End-to-End E2E (Playwright + Page Object Model)
 Wszystkie 8 testów E2E w przeglądarce Chromium (weryfikujących rejestrację, odebranie maila z Mailpita, aktywację konta, logowanie, obliczenia w kalkulatorze BMR/TDEE, dodawanie i usuwanie posiłków w dzienniku oraz interaktywny wykres wagi SVG) uruchomisz poleceniem:
-````powershell
+```powershell
 npm --prefix tests run test:e2e
 ```
 *(Wymaga uruchomionych usług Docker, backendu na porcie 5000 oraz frontendu na porcie 4200).*
 
 ### 8. Podgląd Raportu HTML z Testów
 Po wykonaniu testów Playwright możesz otworzyć interaktywny raport HTML z krokami, zrzutami ekranu i czasem wykonania:
-````powershell
+```powershell
 npm --prefix tests run report
 ```
 
